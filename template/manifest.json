@@ -1,0 +1,31 @@
+{
+    "manifest_version": 3,
+    "name": "Travel Itinerary Builder",
+    "version": "1.0",
+    "description": "Build a customized travel itinerary based on your search.",
+    "permissions": [
+      "activeTab",
+      "scripting",
+      "storage",
+      "tabs",
+      "http://localhost/*"
+    ],
+    "action": {
+      "default_popup": "popup.html",
+      "default_icon": {
+      }
+    },
+    "background": {
+      "service_worker": "background.js"
+    },
+    "content_scripts": [
+      {
+        "matches": ["<all_urls>"],
+        "js": ["content.js"]
+      }
+    ],
+    "content_security_policy": {
+        "extension_pages": "script-src 'self' http://localhost:5000/itinerary; object-src 'self'"
+    }  
+  }
+  

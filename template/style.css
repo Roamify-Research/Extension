@@ -1,0 +1,21 @@
+body {
+    font-family: Arial, sans-serif;
+    padding: 10px;
+  }
+  
+  h1 {
+    font-size: 20px;
+  }
+  
+  button {
+    margin: 10px 0;
+    padding: 10px 15px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  
+  #itinerary {
+    margin-top: 20px;
+    white-space: pre-wrap;
+  }
+  
