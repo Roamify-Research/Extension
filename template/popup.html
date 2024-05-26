@@ -1,13 +1,22 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Travel Itinerary Builder</title>
-    <script src="popup.js"></script>
-    <link rel="stylesheet" type="text/css" href="styles.css">
+  <title>Get HTML</title>
+  <style>
+    body {
+      width: 200px;
+      font-family: Arial, sans-serif;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+    }
+  </style>
 </head>
 <body>
-    <h1>Travel Itinerary</h1>
-    <button id="get-itinerary">Get Itinerary</button>
-    <div id="itinerary"></div>
+  <button id="get-html">Get HTML of Active Tab</button>
+  <pre id="html-content"></pre>
+  <script src="popup.js"></script>
 </body>
 </html>
