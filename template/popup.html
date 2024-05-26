@@ -4,7 +4,7 @@
   <title>Get HTML</title>
   <style>
     body {
-      width: 200px;
+      width: 300px;
       font-family: Arial, sans-serif;
     }
     button {
@@ -12,10 +12,16 @@
       padding: 10px;
       margin: 10px 0;
     }
+    pre {
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      max-height: 400px;
+      overflow-y: auto;
+    }
   </style>
 </head>
 <body>
-  <button id="get-html">Get HTML of Active Tab</button>
+  <button id="get-html">Get HTML of All Tabs</button>
   <pre id="html-content"></pre>
   <script src="popup.js"></script>
 </body>
