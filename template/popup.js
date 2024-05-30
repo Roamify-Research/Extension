@@ -4,9 +4,9 @@ document.getElementById('get-html').addEventListener('click', () => {
     let tabCount = tabs.length;
     
     tabs.forEach((tab) => {
-      // this effectively skips chrome urls
+      // Skip chrome:// URLs
       if (tab.url.startsWith('chrome://')) {
-        console.warn(`Skipping tab with URL ${tab.url} - Cannot access chrome:// URLs`);
+        // console.warn(`Skipping tab with URL ${tab.url} - Cannot access chrome:// URLs`);
         tabCount--;
         if (htmlContents.length === tabCount) {
           handleHtmlContents(htmlContents);
@@ -35,45 +35,46 @@ document.getElementById('get-html').addEventListener('click', () => {
 });
 
 function getValuableContent() {
-  let title = document.title;
-  let description = document.querySelector('meta[name="description"]')?.content || 'No description';
-  let mainContent = document.querySelector('main')?.innerText || document.body.innerText || 'No main content';
-  return { title, description, mainContent };
+  let mainContent = '';
+
+  // Attempt to extract the main content
+  let mainElement = document.querySelector('main') || document.body;
+  if (mainElement) {
+    mainContent = mainElement.innerHTML || 'No main content';
+  }
+
+  return { mainContent };
 }
 
 function handleHtmlContents(contents) {
   let allLinks = [];
   contents.forEach(item => {
     let links = extractLinks(item.content.mainContent);
-    allLinks.push(...links.map(link => ({ parentUrl: item.url, url: link })));
+    allLinks.push(...links);
   });
 
-  // Send links to background script for fetching
-  chrome.runtime.sendMessage({ action: "fetchLinks", links: allLinks }, (response) => {
-    if (response.status === "success") {
-      displayHtmlContents(contents, response.data);
-    } else {
-      console.error('Error fetching links:', response.error);
-    }
-  });
+  displayLinks(allLinks);
 }
 
 function extractLinks(mainContent) {
   const tempDiv = document.createElement('div');
   tempDiv.innerHTML = mainContent;
   const links = Array.from(tempDiv.querySelectorAll('a')).map(a => a.href);
-  return links;
+
+  // Exclude image file links
+  const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.svg'];
+  return links.filter(link => {
+    const lowerCaseLink = link.toLowerCase();
+    return !imageExtensions.some(extension => lowerCaseLink.endsWith(extension));
+  });
 }
 
-function displayHtmlContents(originalContents, fetchedContents) {
+
+function displayLinks(links) {
   const preElement = document.getElementById('html-content');
   preElement.textContent = '';
 
-  originalContents.forEach((item, index) => {
-    preElement.textContent += `Original Tab ${index + 1} URL: ${item.url}\nTitle: ${item.content.title}\nDescription: ${item.content.description}\nMain Content:\n${item.content.mainContent}\n\n----------------\n\n`;
-  });
-
-  fetchedContents.forEach((item, index) => {
-    preElement.textContent += `Fetched Link ${index + 1} Parent URL: ${item.parentUrl}\nLink URL: ${item.url}\nContent:\n${item.content}\n\n----------------\n\n`;
+  links.forEach((link, index) => {
+    preElement.textContent += `Link ${index + 1}: ${link}\n\n`;
   });
 }
