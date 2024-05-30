@@ -4,6 +4,16 @@ document.getElementById('get-html').addEventListener('click', () => {
     let tabCount = tabs.length;
     
     tabs.forEach((tab) => {
+      // this effectively skips chrome urls
+      if (tab.url.startsWith('chrome://')) {
+        console.warn(`Skipping tab with URL ${tab.url} - Cannot access chrome:// URLs`);
+        tabCount--;
+        if (htmlContents.length === tabCount) {
+          handleHtmlContents(htmlContents);
+        }
+        return;
+      }
+
       chrome.scripting.executeScript(
         {
           target: { tabId: tab.id },
@@ -27,14 +37,7 @@ document.getElementById('get-html').addEventListener('click', () => {
 function getValuableContent() {
   let title = document.title;
   let description = document.querySelector('meta[name="description"]')?.content || 'No description';
-  let mainContent = '';
-  
-  // Attempt to extract the main content
-  let mainElement = document.querySelector('main') || document.body;
-  if (mainElement) {
-    mainContent = mainElement.innerText || mainElement.textContent || 'No main content';
-  }
-
+  let mainContent = document.querySelector('main')?.innerText || document.body.innerText || 'No main content';
   return { title, description, mainContent };
 }
 
@@ -45,7 +48,14 @@ function handleHtmlContents(contents) {
     allLinks.push(...links.map(link => ({ parentUrl: item.url, url: link })));
   });
 
-  fetchHtmlFromLinks(allLinks, contents);
+  // Send links to background script for fetching
+  chrome.runtime.sendMessage({ action: "fetchLinks", links: allLinks }, (response) => {
+    if (response.status === "success") {
+      displayHtmlContents(contents, response.data);
+    } else {
+      console.error('Error fetching links:', response.error);
+    }
+  });
 }
 
 function extractLinks(mainContent) {
@@ -53,18 +63,6 @@ function extractLinks(mainContent) {
   tempDiv.innerHTML = mainContent;
   const links = Array.from(tempDiv.querySelectorAll('a')).map(a => a.href);
   return links;
-}
-
-function fetchHtmlFromLinks(links, originalContents) {
-  let fetchPromises = links.map(link =>
-    fetch(link.url).then(response => response.text().then(data => ({ parentUrl: link.parentUrl, url: link.url, content: data })))
-  );
-  
-  Promise.all(fetchPromises).then(pagesHtml => {
-    displayHtmlContents(originalContents, pagesHtml);
-  }).catch(error => {
-    console.error('Error fetching links:', error);
-  });
 }
 
 function displayHtmlContents(originalContents, fetchedContents) {
