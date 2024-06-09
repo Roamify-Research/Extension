@@ -4,16 +4,6 @@ document.getElementById('get-html').addEventListener('click', () => {
     let tabCount = tabs.length;
     
     tabs.forEach((tab) => {
-      // Skip chrome:// URLs
-      if (tab.url.startsWith('chrome://')) {
-        // console.warn(`Skipping tab with URL ${tab.url} - Cannot access chrome:// URLs`);
-        tabCount--;
-        if (htmlContents.length === tabCount) {
-          handleHtmlContents(htmlContents);
-        }
-        return;
-      }
-
       chrome.scripting.executeScript(
         {
           target: { tabId: tab.id },
@@ -35,46 +25,76 @@ document.getElementById('get-html').addEventListener('click', () => {
 });
 
 function getValuableContent() {
+  let title = document.title;
+  let description = document.querySelector('meta[name="description"]')?.content || 'No description';
   let mainContent = '';
 
-  // Attempt to extract the main content
   let mainElement = document.querySelector('main') || document.body;
   if (mainElement) {
-    mainContent = mainElement.innerHTML || 'No main content';
+    mainContent = mainElement.innerText || mainElement.textContent || 'No main content';
   }
 
-  return { mainContent };
+  return { title, description, mainContent };
 }
 
 function handleHtmlContents(contents) {
-  let allLinks = [];
-  contents.forEach(item => {
-    let links = extractLinks(item.content.mainContent);
-    allLinks.push(...links);
+  let itineraryItems = contents.map(item => {
+    if (item.url.includes('flight') || item.url.includes('railway') || item.url.includes('train')) {
+      return extractBookingInfo(item.url, item.content);
+    } else {
+      return extractGeneralInfo(item.url, item.content);
+    }
   });
-
-  displayLinks(allLinks);
+  displayItinerary(itineraryItems);
 }
 
-function extractLinks(mainContent) {
-  const tempDiv = document.createElement('div');
-  tempDiv.innerHTML = mainContent;
-  const links = Array.from(tempDiv.querySelectorAll('a')).map(a => a.href);
-
-  // Exclude image file links
-  const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.svg'];
-  return links.filter(link => {
-    const lowerCaseLink = link.toLowerCase();
-    return !imageExtensions.some(extension => lowerCaseLink.endsWith(extension));
-  });
+function extractGeneralInfo(url, content) {
+  return { url, title: content.title, description: content.description, mainContent: content.mainContent };
 }
 
+function extractBookingInfo(url, content) {
+  const bookingInfo = { url, title: content.title, description: content.description, mainContent: content.mainContent, bookingDetails: [] };
 
-function displayLinks(links) {
+  // Example patterns for extracting booking details
+  const flightPatterns = [
+    /(?:Flight|Airline|Carrier):\s*(.*)/gi,
+    /(?:Departure|Arriving):\s*(.*)/gi,
+    /(?:Flight Number|Flight No):\s*(.*)/gi,
+    /(?:Departure Time|Arrival Time|Time):\s*(.*)/gi
+  ];
+
+  const trainPatterns = [
+    /(?:Train|Railway|Service):\s*(.*)/gi,
+    /(?:Departure|Arriving):\s*(.*)/gi,
+    /(?:Train Number|Train No):\s*(.*)/gi,
+    /(?:Departure Time|Arrival Time|Time):\s*(.*)/gi
+  ];
+
+  let mainContent = content.mainContent;
+
+  const patterns = url.includes('flight') ? flightPatterns : trainPatterns;
+  
+  patterns.forEach(pattern => {
+    let matches = mainContent.matchAll(pattern);
+    for (let match of matches) {
+      bookingInfo.bookingDetails.push(match[0].trim());
+    }
+  });
+
+  return bookingInfo;
+}
+
+function displayItinerary(itineraryItems) {
   const preElement = document.getElementById('html-content');
   preElement.textContent = '';
 
-  links.forEach((link, index) => {
-    preElement.textContent += `Link ${index + 1}: ${link}\n\n`;
+  itineraryItems.forEach((item, index) => {
+    preElement.textContent += `Tab ${index + 1} URL: ${item.url}\nTitle: ${item.title}\nDescription: ${item.description}\n`;
+    if (item.bookingDetails && item.bookingDetails.length) {
+      preElement.textContent += `Booking Details:\n${item.bookingDetails.join('\n')}\n`;
+    } else {
+      preElement.textContent += `Main Content:\n${item.mainContent}\n`;
+    }
+    preElement.textContent += `\n----------------\n\n`;
   });
 }
