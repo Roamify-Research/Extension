@@ -1,0 +1,62 @@
+@font-face {
+  font-family: 'Mouse Memoirs';
+  src: url("../assets/MouseMemoirs-Regular.ttf");
+  font-weight: bolder;
+  font-style: normal;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  margin: 0;
+  min-height: 100vh;
+  background: #251F48;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.logo {
+  position: absolute;
+  top: 100px; /* Adjust this value as needed */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+}
+
+.button {
+  position: relative;
+  background-color: #AB85BA;
+  color: #251F48;
+  width: 40vh;
+  margin-top: 400px;
+  font-size: 450%;
+  font-family: "Mouse Memoirs", sans-serif;
+  height: 15vh;
+  border-radius: 20px;
+  display: flex;
+  justify-content: center; /* Center content horizontally within the button */
+  align-items: center; /* Center content vertically within the button */
+  overflow: hidden; /* Ensure the pseudo-element doesn't overflow */
+}
+
+.button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 200%;
+  height: 100%;
+  background: linear-gradient(120deg, transparent, #D4B3D6, transparent);
+  transition: all 0.5s ease;
+  opacity: 0; /* Initially hidden */
+}
+
+.button:hover::before {
+  left: 100%;
+  opacity: 2; /* Visible on hover */
+}
+
+.button:hover {
+  cursor: pointer;
+}
