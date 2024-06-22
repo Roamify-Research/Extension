@@ -1,0 +1,117 @@
+@font-face {
+  font-family: 'Mouse Memoirs';
+  src: url("../assets/MouseMemoirs-Regular.ttf");
+  font-weight: bolder;
+  font-style: normal;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  margin: 0;
+  min-height: 100vh;
+  background: #251F48;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  overflow: hidden;
+}
+
+.header {
+  width: 100%;
+  background-color: #2E265A;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+.app-name {
+  font-family: 'Mouse Memoirs', sans-serif;
+  margin: 0;
+  font-size: 2rem;
+}
+
+.profile-icon {
+  width: 40px;
+  height: 40px;
+  background-color: white;
+  border-radius: 50%;
+}
+
+.main-content {
+  text-align: center;
+  color: #fff;
+}
+
+.welcome-message {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.search-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.search-box {
+  background-color: #4B3C87;
+  color: white;
+  padding: 1rem;
+  border-radius: 25px;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.search-icon {
+  margin-right: 0.5rem;
+}
+
+.days-container {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.day-btn {
+  background-color: #4B3C87;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  margin: 0 0.5rem;
+  cursor: pointer;
+}
+
+.day-count {
+  font-size: 1.2rem;
+}
+
+.plan-btn {
+  background-color: #B292D6;
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+}
+
+.footer {
+  width: 100%;
+  background-color: #2E265A;
+  color: white;
+  display: flex;
+  justify-content: space-around;
+  padding: 1rem 0;
+}
+
+.footer-btn {
+  font-size: 1.5rem;
+  cursor: pointer;
+}

@@ -14,6 +14,19 @@ body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  overflow: hidden;
+}
+
+.page {
+  transition: transform 0.5s ease;
+}
+
+.page.slide-out {
+  transform: translateX(-100%);
+}
+
+.page.slide-in {
+  transform: translateX(0);
 }
 
 .logo {
@@ -54,7 +67,7 @@ body {
 
 .button:hover::before {
   left: 100%;
-  opacity: 2; /* Visible on hover */
+  opacity: 1; /* Visible on hover */
 }
 
 .button:hover {
