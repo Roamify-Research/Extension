@@ -44,8 +44,10 @@ body {
 }
 
 .main-content {
-  color: #fff;
+  scroll-behavior: smooth;
+  color: #251F48;
   padding: 2rem 0; /* Add padding to main content if needed */
+  z-index: 2;
 }
 
 .welcome-message, .cloud-1 {
@@ -167,6 +169,17 @@ body {
   font-family: "Mouse Memoirs", sans-serif;
   margin-top: 2rem;
   font-size: x-large;
+}
+
+.cloud-3 {
+  top: 70%;
+  left: 150px;
+  transform: translateX(-50%);
+  position: absolute;
+  font-size: 2.5rem;
+  color: #251F48;
+  font-family: "Mouse Memoirs", sans-serif;
+  z-index: 1;
 }
 
 .footer {
