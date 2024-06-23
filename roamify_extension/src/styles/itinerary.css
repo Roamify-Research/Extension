@@ -1,7 +1,7 @@
 @font-face {
   font-family: 'Mouse Memoirs';
   src: url("../assets/MouseMemoirs-Regular.ttf");
-  font-weight: bolder;
+  font-weight: bold;
   font-style: normal;
 }
 
@@ -9,11 +9,10 @@ body {
   font-family: 'Poppins', sans-serif;
   margin: 0;
   min-height: 100vh;
-  background: #251F48;
+  background: #D1F0FE;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  align-items: center;
   overflow: hidden;
 }
 
@@ -26,80 +25,148 @@ body {
   align-items: center;
   padding: 1rem;
   box-sizing: border-box;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+  position: relative; /* Added position: relative */
 }
 
 .app-name {
   font-family: 'Mouse Memoirs', sans-serif;
   margin: 0;
-  font-size: 2rem;
+  font-size: 5rem;
 }
 
 .profile-icon {
-  width: 40px;
-  height: 40px;
-  background-color: white;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
+  background-color: white;
 }
 
 .main-content {
-  text-align: center;
   color: #fff;
+  padding: 2rem 0; /* Add padding to main content if needed */
 }
 
-.welcome-message {
-  font-size: 1.5rem;
-  margin-bottom: 1rem;
+.welcome-message, .cloud-1 {
+  margin-top: 10px;
+  top: 15%;
+  left: 150px;
+  transform: translateX(-50%);
+  position: absolute;
+  font-size: 2.5rem;
+  color: #251F48;
+  font-family: "Mouse Memoirs", sans-serif;
 }
 
 .search-container {
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin-top: 20px;
+  justify-content: center; /* Ensure the content is centered vertically */
+  width: 100%; /* Take full width */
+  height: 100%; /* Take full height */
+  z-index: 2;
 }
 
 .search-box {
   background-color: #4B3C87;
   color: white;
-  padding: 1rem;
-  border-radius: 25px;
-  margin-bottom: 1rem;
+  padding: 0.5rem 1rem; /* Adjust padding for better alignment */
+  width: 70%;
+  height: 50px;
+  border-radius: 50px;
   display: flex;
   align-items: center;
-  cursor: pointer;
+  z-index: inherit;
 }
 
 .search-icon {
-  margin-right: 0.5rem;
+  width: 20px; /* Adjust size as needed */
+  height: 20px;
+  margin-right: 1rem; /* Add margin to separate the icon from the text */
+}
+
+.search-input::placeholder {
+  color: white;
+  text-align: left; /* Align text to the left */
+  font-family: "Mouse Memoirs", sans-serif;
+  font-size: 1.5rem;
+}
+
+.search-input {
+  color: white;
+  background-color: transparent;
+  border: none;
+  width: inherit;
+  font-size: 1.5rem;;
+  outline: none;
+  resize: none;
+  font-family: 'Mouse Memoirs', sans-serif;
+  padding: 0; /* Remove padding from the input */
+  margin: 0; /* Remove margin from the input */
+}
+
+
+.cloud-2 {
+  top: 45%;
+  right: 150px;
+  transform: translateX(50%);
+  position: absolute;
+  font-size: 2.5rem;
+  color: #251F48;
+  font-family: "Mouse Memoirs", sans-serif;
+  z-index: 1;
 }
 
 .days-container {
   display: flex;
   align-items: center;
-  margin-bottom: 1rem;
+  margin-bottom: 30px;
+  margin-top: 20px;
+  z-index: 2;
+}
+
+.day-text {
+  font-size: 1.5rem;
+  color: #4A417D;
+  margin-right: 1rem;
+  font-family: "Mouse Memoirs", sans-serif;
 }
 
 .day-btn {
-  background-color: #4B3C87;
-  color: white;
-  border: none;
+  border-color: #4A417D;
+  color: #4A417D;
+  background-color: transparent;
   border-radius: 50%;
   width: 30px;
   height: 30px;
+  font-size: 1.2rem;
   margin: 0 0.5rem;
   cursor: pointer;
+  font-family: "Mouse Memoirs", sans-serif;
 }
 
 .day-count {
   font-size: 1.2rem;
+  color: #4A417D;
+  font-family: "Mouse Memoirs", sans-serif;
 }
 
 .plan-btn {
   background-color: #B292D6;
   color: white;
-  padding: 0.5rem 1rem;
   border: none;
+  width: 50%;
+  padding: 0.5rem 1rem;
   border-radius: 25px;
   cursor: pointer;
+  z-index: 2;
+  height: 70px;
+  font-family: "Mouse Memoirs", sans-serif;
+  margin-top: 2rem;
+  font-size: x-large;
 }
 
 .footer {
@@ -107,11 +174,27 @@ body {
   background-color: #2E265A;
   color: white;
   display: flex;
-  justify-content: space-around;
+  justify-content: center;
   padding: 1rem 0;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
 }
 
 .footer-btn {
   font-size: 1.5rem;
   cursor: pointer;
+  padding-left: 10%;
+  padding-right: 10%;
+  display: flex;
+  align-items: center;
+}
+
+.footer-btn img {
+  width: 40px; /* Adjust size as needed */
+  height: 40px;
+}
+
+.footer-btn:not(:first-child):not(:last-child) {
+  border-left: 1px solid white;
+  border-right: 1px solid white;
 }

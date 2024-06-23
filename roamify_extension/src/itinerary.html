@@ -9,28 +9,31 @@
 <body>
   <header class="header">
     <h1 class="app-name">ROAMIFY</h1>
-    <div class="profile-icon"></div>
+    <img src="./assets/profile.svg" class="profile-icon"/>
   </header>
+  <img class="cloud-1" src="./assets/cloud_design.svg" alt="Cloud"/>
+  <img src="./assets/cloud_design.svg" class="cloud-2" alt="Cloud"/>
   <main class="main-content">
     <h2 class="welcome-message">Welcome back, Noel!</h2>
     <div class="search-container">
       <div class="search-box">
-        <span class="search-icon">&#128269;</span> <!-- Unicode character for search icon -->
-        <span>Where to Next?</span>
-      </div>
+        <img class="search-icon" src="./assets/search-icon.svg" alt="Search Icon"/>
+        <input type="text" class="search-input" placeholder="Search for a city"/>
+      </div>      
       <div class="days-container">
-        <span>Number of days:</span>
-        <button class="day-btn">-</button>
-        <span class="day-count">0</span>
-        <button class="day-btn">+</button>
+        <span class="day-text">Number of days:</span>
+        <button class="day-btn" id="decrease-btn">-</button>
+        <span class="day-count" id="day-count">0</span>
+        <button class="day-btn" id="increase-btn">+</button>
       </div>
       <button class="plan-btn">Plan My Itinerary</button>
     </div>
   </main>
   <footer class="footer">
-    <div class="footer-btn">&#9776;</div> <!-- Unicode character for menu icon -->
-    <div class="footer-btn">&#8634;</div> <!-- Unicode character for refresh icon -->
-    <div class="footer-btn">&#9432;</div> <!-- Unicode character for info icon -->
+    <img class="footer-btn" src="./assets/menu_icon.svg" alt="Menu Icon"/>
+    <img class="footer-btn" src="./assets/reload_icon.svg" alt="Reload Icon"/>
+    <img class="footer-btn" src="./assets/info_icon.svg" alt="Info Icon"/>
   </footer>
+  <script src="./scripts/itinerary.js"></script>  
 </body>
 </html>
