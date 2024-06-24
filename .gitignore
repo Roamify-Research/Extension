@@ -1,2 +1,4 @@
-template/.DS_Store
 .DS_Store
+roamify_extension/backend/__pycache__/
+roamify_extension/backend/app/__pycache__/
+roamify_extension/backend/.venv/
