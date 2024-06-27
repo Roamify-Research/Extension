@@ -12,9 +12,6 @@
   "action": {
     "default_title": "Tab HTML Retriever"
   },
-  "content_security_policy": {
-    "extension_pages": "default-src 'none'; style-src 'self' 'unsafe-inline'; media-src https://www.stefanvd.net; frame-src https://www.youtube.com https://www.stefanvd.net; connect-src https://www.stefanvd.net; script-src 'self'; img-src 'self' https://www.stefanvd.net * data:; object-src 'none'"
-  },
   "options_ui": {
     "page": "options.html",
     "open_in_tab": true
@@ -27,12 +24,10 @@
     "sidePanel",
     "tabs",
     "scripting",
-    "activeTab",
-    "http://localhost:5000/*",
-    "https://traveltriangle.com/*"
+    "activeTab"
   ],
   "host_permissions": [
-    "https://traveltriangle.com/*",
-    "http://localhost:5000/*"
+    "http://localhost:5000/*",
+    "https://traveltriangle.com/*"
   ]
 }
