@@ -43,10 +43,46 @@ function extractFlightDetails(url) {
     'AMD': 'Ahmedabad',
     'PNQ': 'Pune',
     'MYQ': 'Mysore',
-    'CCJ' : 'Kozhikode',
-    'TIR' : 'Tirupati',
-    'DED': 'Dehradun',
-    'AGR': 'Agra',
+    'CCJ': 'Kozhikode',
+    'JFK': 'New York ',
+    'LGA': 'New York',
+    'EWR': 'New York ',
+    'BHB': 'Bhubaneswar',
+    'DCA': 'Washington DC ',
+    'IAD': 'Washington DC',
+    'LAS': 'Las Vegas',
+    'SAN': 'San Diego',
+    'MCO': 'Orlando',
+    'ORD': 'Chicago',
+    'MDW': 'Chicago ',
+    'MIA': 'Miami',
+    'PHX': 'Arizona',
+    'TPA': 'Tampa',
+    'RSW': 'Florida',
+    'FLL': 'Florida',
+    'GOI': 'Goa',
+    'IXC': 'Chandigarh',
+    'JDH': 'Jodhpur',
+    'SHL': 'meghalaya',
+    'IMF': 'Manipur',
+    'DMU': 'Manipur',
+    'DIB': 'Assam',
+    'GAU': 'Assam',
+    'DIB': 'Assam',
+    'GAU': 'Assam',
+    'DAI': 'Diu',
+    'DED': 'Rishikesh',
+    'IXZ': 'Andaman & Nicobar',
+    'IXA': 'Tripura',
+    'DMU': 'Nagaland',
+  'DMU': 'Nagaland',
+  'LON':'london',
+  'PAR':'Paris',
+  'NYC':'New-york',
+  'AJL':'mizoram',
+  'DIU':'Diu',
+  'SLV':'shimla',
+  'DED':'Dehradun'
   };
 
   let matches = url.match(/[A-Z]{3}/g);
@@ -71,10 +107,10 @@ function displayFlightInfo(info) {
     let linksToFetch = info.map(item => {
       return {
         dst: item.dst,
-        link: `https://traveltriangle.com/blog/places-to-visit-in-${item.dst.toLowerCase()}/`
+        link: `https://traveltriangle.com/blog/places-to-visit-in-${item.dst.toLowerCase()}/`,
       };
     });
-
+  
     fetchTravelTriangleData(linksToFetch);
   }
 }
