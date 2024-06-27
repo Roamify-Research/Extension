@@ -27,9 +27,12 @@
     "sidePanel",
     "tabs",
     "scripting",
-    "activeTab"
+    "activeTab",
+    "http://localhost:5000/*",
+    "https://traveltriangle.com/*"
   ],
   "host_permissions": [
-    "<all_urls>"
+    "https://traveltriangle.com/*",
+    "http://localhost:5000/*"
   ]
 }

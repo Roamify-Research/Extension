@@ -1,3 +1,21 @@
+const backend = (data) => {
+  const API_URL = 'http://localhost:5000/process';
+
+  const processItinerary = async () => {
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    });
+
+    return response.json();
+  };
+
+  return {processItinerary};
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   const decreaseBtn = document.getElementById('decrease-btn');
   const increaseBtn = document.getElementById('increase-btn');
@@ -23,26 +41,25 @@ document.addEventListener('DOMContentLoaded', () => {
   for (let i = 0; i < planBtns.length; i++) {
     planBtns[i].addEventListener('click', () => {
       chrome.tabs.query({}, (tabs) => {
-        let htmlContents = [];
-        let processedTabs = 0;
-        let tabCount = tabs.length;
-
+        let flightInfo = [];
+        let processedCount = 0;
+    
         tabs.forEach((tab) => {
           chrome.scripting.executeScript(
             {
               target: { tabId: tab.id },
-              func: getValuableContent
+              func: getHtmlContent
             },
             (results) => {
-              processedTabs++;
+              processedCount++;
               if (results && results[0]) {
-                htmlContents.push({ url: tab.url, content: results[0].result });
-              } else {
-                console.error(`Failed to get valuable content for tab ${tab.url}`);
+                let flightDetails = extractFlightDetails(tab.url);
+                if (flightDetails) {
+                  flightInfo.push({ url: tab.url, ...flightDetails });
+                }
               }
-
-              if (processedTabs === tabCount) {
-                handleHtmlContents(htmlContents);
+              if (processedCount === tabs.length) {
+                displayFlightInfo(flightInfo);
               }
             }
           );
@@ -52,175 +69,163 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-function getValuableContent() {
-  const extractText = (selectors) => {
-    for (let selector of selectors) {
-      let element = document.querySelector(selector);
-      if (element) {
-        return element.innerText || element.textContent || '';
-      }
-    }
-    return 'No information available';
+function getHtmlContent() {
+  return document.documentElement.outerHTML;
+}
+
+function extractFlightDetails(url) {
+  const airportCodes = {
+    'BOM': 'Mumbai',
+    'BLR': 'Bangalore',
+    'DEL': 'Delhi',
+    'HYD': 'Hyderabad',
+    'MAA': 'Chennai',
+    'CCU': 'Kolkata',
+    'GOI': 'Goa',
+    'JAI': 'Jaipur',
+    'AMD': 'Ahmedabad',
+    'PNQ': 'Pune',
+    'MYQ': 'Mysore',
+    'CCJ' : 'Kozhikode',
+    'TIR' : 'Tirupati',
+    'DED': 'Dehradun',
+    'AGR': 'Agra',
   };
 
-  let title = document.title || 'No title';
-
-  let description = extractText(['meta[name="description"]', 'meta[property="og:description"]']);
-
-  let mainContent = '';
-  let timings = '';
-  let address = '';
-  let rating = '';
-  let reviewCount = '';
-  let attractionDetails = [];
-  let popularCities = [];
-  let tours = [];
-
-  let mainElement = document.querySelector('main') || document.body;
-  if (mainElement) {
-    mainContent = mainElement.innerText || mainElement.textContent || 'No main content';
-  }
-
-  timings = extractText(['.opening-hours', '.operating-hours', '.hours', '.time-info', '.hours-info']);
-  address = extractText(['.address', '.location', '.place-address', '.contact-info .address', '.address-info']);
-  rating = extractText(['.rating', '.review-rating', '.star-rating', '.user-rating', '.score']);
-  reviewCount = extractText(['.review-count', '.review-number', '.number-of-reviews', '.reviews-count', '.total-reviews']);
-
-  let attractionSelectors = ['.attraction', '.attraction-item', '.poi-item', '.tourist-attraction', '.place-of-interest'];
-  let attractionElements = [];
-  for (let selector of attractionSelectors) {
-    let elements = document.querySelectorAll(selector);
-    if (elements.length > 0) {
-      attractionElements = elements;
-      break;
+  let matches = url.match(/[A-Z]{3}/g);
+  if (matches && matches.length >= 2) {
+    let [srcCode, dstCode] = matches;
+    let src = airportCodes[srcCode];
+    let dst = airportCodes[dstCode];
+    if (src && dst) {
+      return { src, dst };
     }
   }
+  return null;
+}
 
-  attractionElements.forEach((element) => {
-    let attractionName = extractText(['.attraction-name', '.poi-title', '.name', '.title', 'h2', 'h3', 'h4'], element);
-    let attractionDesc = extractText(['.attraction-description', '.poi-description', '.description', '.desc', 'p'], element);
-    let attractionTimings = extractText(['.attraction-timings', '.poi-timings', '.timings', '.time', '.hours'], element);
-    let attractionRating = extractText(['.attraction-rating', '.poi-rating', '.rating', '.score', '.star-rating'], element);
-    let attractionReviewCount = extractText(['.attraction-review-count', '.poi-review-count', '.reviews', '.review-count', '.number-of-reviews'], element);
+function displayFlightInfo(info) {
+  const preElement = document.getElementById('main-content');
+  preElement.textContent = '';
 
-    if (attractionName !== 'No information available') {
-      attractionDetails.push({
-        attractionName,
-        attractionDesc,
-        attractionTimings,
-        attractionRating,
-        attractionReviewCount
+  if (info.length === 0) {
+    preElement.textContent = 'No flight booking websites found or no destinations detected.';
+  } else {
+    let linksToFetch = info.map(item => {
+      return {
+        dst: item.dst,
+        link: `https://traveltriangle.com/blog/places-to-visit-in-${item.dst.toLowerCase()}/`
+      };
+    });
+
+    fetchTravelTriangleData(linksToFetch);
+  }
+}
+
+function fetchTravelTriangleData(linksToFetch) {
+  let htmlContents = [];
+  let processedLinks = 0;
+
+  linksToFetch.forEach(linkInfo => {
+    fetch(linkInfo.link)
+      .then(response => response.text())
+      .then(html => {
+        htmlContents.push({ url: linkInfo.link, html });
+        processedLinks++;
+        if (processedLinks === linksToFetch.length) {
+          handleHtmlContents(htmlContents);
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching the URL:', error);
+        processedLinks++;
+        if (processedLinks === linksToFetch.length) {
+          handleHtmlContents(htmlContents);
+        }
       });
-    }
   });
-
-  let citySelectors = ['.city-name', '.city', '.location-name'];
-  let cityElements = document.querySelectorAll('.popular-cities > div');
-  cityElements.forEach((element) => {
-    let cityName = extractText(citySelectors, element);
-    let cityLocation = extractText(['.location', '.city-location', '.country'], element);
-    if (cityName !== 'No information available') {
-      popularCities.push({ cityName, cityLocation });
-    }
-  });
-
-  let tourSelectors = ['.tour', '.tour-item', '.experience'];
-  let tourElements = document.querySelectorAll('.ways-to-tour > div');
-  tourElements.forEach((element) => {
-    let tourName = extractText(['.tour-name', '.experience-title', '.title', 'h2', 'h3', 'h4'], element);
-    let tourDesc = extractText(['.tour-description', '.experience-description', '.description', '.desc', 'p'], element);
-    let tourRating = extractText(['.tour-rating', '.experience-rating', '.rating', '.score', '.star-rating'], element);
-    let tourReviewCount = extractText(['.tour-review-count', '.experience-review-count', '.reviews', '.review-count', '.number-of-reviews'], element);
-    let tourPrice = extractText(['.tour-price', '.experience-price', '.price', '.cost'], element);
-
-    if (tourName !== 'No information available') {
-      tours.push({
-        tourName,
-        tourDesc,
-        tourRating,
-        tourReviewCount,
-        tourPrice
-      });
-    }
-  });
-
-  return { title, description, mainContent, timings, address, rating, reviewCount, attractionDetails, popularCities, tours };
 }
 
 function handleHtmlContents(contents) {
-  let filteredContents = contents.filter(item => {
-    return !item.url.includes('flight') && !item.url.includes('railway') && !item.url.includes('train');
-  });
-
-  let formattedContents = filteredContents.map(item => {
-    return {
-      url: item.url,
-      title: item.content.title,
-      description: item.content.description,
-      mainContent: item.content.mainContent,
-      timings: item.content.timings,
-      address: item.content.address,
-      rating: item.content.rating,
-      reviewCount: item.content.reviewCount,
-      attractions: item.content.attractionDetails,
-      cities: item.content.popularCities,
-      tours: item.content.tours
-    };
-  });
-
-  displayHtmlContents(formattedContents);
-}
-
-function displayHtmlContents(contents) {
   const preElement = document.getElementById('main-content');
-  let displayContent = contents.map(item => {
-    let attractions = item.attractions.map(attraction => {
-        return `\nAttraction Name: ${attraction.attractionName}\n\nDescription: ${splitText(attraction.attractionDesc)}\n\nTimings: ${splitText(attraction.attractionTimings)}\n\nRating: ${attraction.attractionRating}\n\nReview Count: ${attraction.attractionReviewCount}\n`;
-    }).join('\n\n');
+  preElement.textContent = '';
+  let mainContent = '';
 
-    let cities = item.cities.map(city => {
-      return `\nCity Name: ${city.cityName}\n\nLocation: ${city.cityLocation}\n`;
-    }).join('\n\n');
+  let isFirstParagraph = true; // Flag to track if it's the first paragraph
 
-    let tours = item.tours.map(tour => {
-      return `\nTour Name: ${tour.tourName}\n\nDescription: ${splitText(tour.tourDesc)}\n\nRating: ${tour.tourRating}\n\nReview Count: ${tour.tourReviewCount}\n\nPrice: ${tour.tourPrice}\n`;
-    }).join('\n\n');
+  contents.forEach(item => {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(item.html, 'text/html');
 
-    return `Tourist Attraction Name: ${item.title}\n\nDescription: ${splitText(item.description)}\n\nAddress: ${item.address}\n\nTimings: ${splitText(item.timings)}\n\nRating: ${item.rating}\n\nReview Count: ${item.reviewCount}\n\nMain Content:\n${splitText(item.mainContent)}\n\nAttractions:\n${attractions}\n\nPopular Cities:\n${cities}\n\nTours:\n${tours}\n\n`;
-  }).join('\n\n');
+    // Remove script tags and elements with inline event handlers
+    doc.querySelectorAll('script, [onclick], [onmouseover], [onmouseout], [onkeydown], [onkeyup], [onkeypress], [onload], [onunload], [onresize], [onscroll], [onblur], [onfocus], [onerror]').forEach(el => el.remove());
 
-  displayContent = filterHeaderFooter(displayContent);
+    // Remove style elements
+    doc.querySelectorAll('style').forEach(el => el.remove());
 
-  preElement.textContent = displayContent;
-}
+    let title = doc.querySelector('title')?.innerText.trim() || 'No title';
+    let description = doc.querySelector('meta[name="description"]')?.getAttribute('content').trim() || 'No description';
+    let mainContent = extractMainContent(doc).trim();
+    let attractions = extractAttractions(doc).trim();
 
-function filterHeaderFooter(text) {
-  const headerRegex = /<header\b[^>]*>(.*?)<\/header>/gi;
-  const footerRegex = /<footer\b[^>]*>(.*?)<\/footer>/gi;
+    // Construct displayContent without extra empty lines
+    let displayContent = `URL: ${item.url}\nTitle: ${title}\nDescription: ${description}\nMain Content: ${mainContent}\nAttractions: ${attractions}`;
 
-  text = text.replace(headerRegex, '');
-  text = text.replace(footerRegex, '');
+    // Clean up the display content
+    displayContent = displayContent.replace(/\n{2,}/g, '\n\n'); // Replace multiple empty lines with a single one
+    displayContent = displayContent.replace(/^\s+|\s+$/g, ''); // Remove leading and trailing whitespace
+    displayContent = displayContent.replace(/\n\s+\n/g, '\n\n'); // Remove empty lines with spaces
 
-  return text;
-}
-
-function splitText(text) {
-  const maxLength = 70;
-  if (text.length <= maxLength) return text;
-  
-  let splitText = '';
-  let words = text.split(' ');
-  let lineLength = 0;
-
-  words.forEach(word => {
-    if (lineLength + word.length <= maxLength) {
-      splitText += word + ' ';
-      lineLength += word.length + 1;
+    // If it's not the first paragraph, add one empty line before displaying the content
+    if (!isFirstParagraph) {
+      preElement.textContent += '\n';
     } else {
-      splitText += '\n' + word + ' ';
-      lineLength = word.length + 1;
+      isFirstParagraph = false;
     }
+
+    // Append displayContent to preElement.textContent
+    mainContent += displayContent;
   });
 
-  return splitText.trim();
+  console.log('Main content:', mainContent);
+
+  // Send the main content to the backend for processing
+  const data = { mainContent };
+  const { processItinerary } = backend(data);
+
+  processItinerary()
+  .then(response => {
+    preElement.textContent = response;
+  })
+  .catch(error => {
+    console.error('Error processing the itinerary:', error);
+    preElement.textContent = 'Error processing the itinerary';
+  });
+}
+
+
+function extractMainContent(doc) {
+  // Extracting the main content by selecting specific elements
+  let mainElement = doc.querySelector('main') || doc.body;
+  return mainElement ? mainElement.innerText.trim() : 'No main content';
+}
+
+function extractAttractions(doc) {
+  let attractionsList = '';
+  let attractionsSection = doc.querySelector('h2 ~ ul'); // Selecting the ul directly after an h2 which often lists attractions
+
+  if (attractionsSection) {
+    let attractions = attractionsSection.querySelectorAll('li');
+    if (attractions.length > 0) {
+      attractions.forEach(attraction => {
+        attractionsList += `
+          Attraction: ${attraction.innerText.trim()}
+        `;
+      });
+    }
+  } else {
+    attractionsList = 'No attractions found';
+  }
+
+  return attractionsList;
 }
