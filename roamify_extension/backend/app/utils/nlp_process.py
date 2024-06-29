@@ -4,21 +4,17 @@ import json
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 
-nltk.download('stopwords')
-nltk.download('punkt')
-
-
-stopwords = set(stopwords.words('english'))
-
 class NLP_Processor:
-    def __init__(self, webscraped_text):
-        self.text = webscraped_text
+    def __init__(self):
+        nltk.download('stopwords')
+        nltk.download('punkt')
+        self.stopwords = set(stopwords.words('english'))
 
-    def NLP_Processing(self):
+    def NLP_Processing(self, webscraped_text):
+        self.text = webscraped_text
         spacy_processed_text = self.spacy_nlp()
         attractions = self.sentence_processing(spacy_processed_text)
         processed_data = self.word_tokenize(attractions)
-
         return processed_data
 
 
