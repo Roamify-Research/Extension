@@ -75,7 +75,7 @@ function fetchTravelTriangleData(linksToFetch) {
 function handleHtmlContents(contents) {
   const preElement = document.getElementById('main-content');
   preElement.textContent = '';
-  let mainContent = '';
+  let content = '';
 
   let isFirstParagraph = true;
 
@@ -99,20 +99,23 @@ function handleHtmlContents(contents) {
     displayContent = displayContent.replace(/\n\s+\n/g, '\n\n');
 
     if (!isFirstParagraph) {
-      preElement.textContent += '\n';
+      content += '\n';
     } else {
       isFirstParagraph = false;
     }
 
-    mainContent += displayContent;
+    content += displayContent;
   });
 
-  const data = { mainContent };
+  const data = { "text" : content};
   const { processItinerary } = backend(data);
 
   processItinerary()
   .then(response => {
-    preElement.textContent = response;
+    for (const [key, value] of Object.entries(response)) {
+      preElement.textContent += `${key}: ${value}`;
+      preElement.textContent += '\n\n';
+    }
   })
   .catch(error => {
     console.error('Error processing the itinerary:', error);
