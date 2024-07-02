@@ -28,6 +28,7 @@
   ],
   "host_permissions": [
     "http://localhost:5000/*",
-    "https://traveltriangle.com/*"
+    "https://traveltriangle.com/*",
+    "https://makemytrip.com/*"
   ]
 }
