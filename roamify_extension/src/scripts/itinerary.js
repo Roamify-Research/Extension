@@ -115,7 +115,7 @@ function displayFlightInfo(info) {
         link: `https://traveltriangle.com/blog/places-to-visit-in-${item.dst.toLowerCase()}/`,
       };
     });
-  
+
     fetchTravelTriangleData(linksToFetch);
   }
 }
@@ -178,37 +178,19 @@ function handleHtmlContents(contents) {
     content += displayContent;
   });
 
-<<<<<<< HEAD
-  const data = { "text": content };
+  const data = { text: content };
   const { processItinerary } = backend(data);
 
   processItinerary()
     .then(response => {
       for (const [key, value] of Object.entries(response)) {
-        preElement.textContent += `${key}: ${value}`;
-        preElement.textContent += '\n\n';
+        preElement.textContent += `${key}: ${value}\n\n`;
       }
     })
     .catch(error => {
       console.error('Error processing the itinerary:', error);
       preElement.textContent = 'Error processing the itinerary';
     });
-=======
-  const data = { "text" : content};
-  const { processItinerary } = backend(data);
-
-  processItinerary()
-  .then(response => {
-    for (const [key, value] of Object.entries(response)) {
-      preElement.textContent += `${key}: ${value}`;
-      preElement.textContent += '\n\n';
-    }
-  })
-  .catch(error => {
-    console.error('Error processing the itinerary:', error);
-    preElement.textContent = 'Error processing the itinerary';
-  });
->>>>>>> bb3cabfd0e15f3296b9890610ec845fb7e1a8000
 }
 
 function extractMainContent(doc) {
