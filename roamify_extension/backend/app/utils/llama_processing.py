@@ -32,8 +32,3 @@ class LlamaProcessing:
 
         return self.tokenizer.decode(result[0], skip_special_tokens=True)
 
-# Initialize the processing class with your model path from Hugging Face
-model_path = "RoamifyRedefined/finetuned-summarization-llama3"
-llama_processing = LlamaProcessing(model_path)
-output = llama_processing.predict_summary("Bangalore Palace Winit deshpande for Wikimedia Commons Built by Chamaraja Wodeyar in the year 1887 Bangalore Palace is an inspired design by England s Windsor Castle and is one of the best tourist places in Bangalore The evocative palace comprises fortified arches towers architecture and green lawns along with sophisticated wood carvings in the interior It is where the royal family still resides at the present This architectural creation is nothing less than an epitome The palace has earned foundations that have been attributed to the Wodeyars of Mysore Location Vasanth Nagar BengaluruTimings Sunday to Monday from 10 00 AM to 5 00 PMEntry Fee INR 230 for Indians INR 460 for foreigners Must Read New Year Party In Bangalore")
-print(output)
