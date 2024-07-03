@@ -1,8 +1,11 @@
 from flask import Blueprint, request, jsonify
-from app.utils.nlp_process import NLP_Processor
+from app.utils.pipeline_processing import Pipeline
 
 # Create a Blueprint
 process_bp = Blueprint('process', __name__)
+
+# Pipeline Processing
+pipeline_processor = Pipeline()
 
 # Load the NLP model
 
@@ -13,10 +16,9 @@ def process_text():
         text = data['text']
 
         # Process the text
-        nlp_processor = NLP_Processor(text)
-        processed_text = nlp_processor.NLP_Processing()
-        print(processed_text)
+        processed_data = pipeline_processor.pipeline_processing(text)
+        print(processed_data)
+        return processed_data
 
-        return jsonify({'processed_text': processed_text})
     elif request.method == 'GET':
         return 'This is the process endpoint'
