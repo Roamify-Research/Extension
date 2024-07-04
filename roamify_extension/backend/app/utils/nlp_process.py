@@ -50,10 +50,20 @@ class NLP_Processor:
     
     def word_tokenize(self, attraction_data):
         processed_data = {}
+        attractions = {}
         for id, attraction in attraction_data.items():
-
+            
             words = word_tokenize(attraction)
-            words = [w for w in words if w.isalnum() and  w != ":" and w != "-" and w.lower() != "image" and w.lower() != "credit" and w.lower() != "source"]
-            processed_data[id] = " ".join(words)
+            name = ""
 
-        return processed_data
+            for i in range(len(words)):
+                if words[i] == "Image":
+                    break
+                name += (words[i] + " ")
+
+            print(name)
+            words = [w for w in words if w.isalnum() and  w != ":" and w != "-" and w.lower() != "image" and w.lower() != "credit" and w.lower() != "source"]
+            attractions[name] = " ".join(words)
+
+        return attractions
+    
