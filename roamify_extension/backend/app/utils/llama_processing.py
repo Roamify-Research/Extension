@@ -17,11 +17,16 @@ class LlamaProcessing:
     def __init__(self, model_path):
         self.model_path = model_path
         self.tokenizer = AutoTokenizer.from_pretrained(model_path)
-        self.model = AutoModelForCausalLM.from_pretrained(model_path)
+        self.model = AutoModelForCausalLM.from_pretrained(
+            model_path,
+            config={
+                "repetition_penalty": 2.0,
+            }
+        )
 
     def predict_summary(self, text):
         prompt = alpaca_prompt.format(
-            "Summarize the following text briefly starting with the name of the attraction.",  # instruction
+            "Give a brief description:",  # instruction
             text,  # input
             ""  # output - leave this blank for generation!
         )
