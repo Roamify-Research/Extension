@@ -1,12 +1,12 @@
-from nlp_process import NLP_Processor
-from t5_processing import T5Processor
-from llama_processing import LlamaProcessing
+from app.utils.nlp_process import NLP_Processor
+from app.utils.t5_processing import T5Processor
+from app.utils.llama_processing import LlamaProcessing
 
 class Pipeline:
     def __init__(self):
         self.nlp_processor = NLP_Processor()
         self.t5_processor = T5Processor()
-        self.llama_processor = LlamaProcessing("RoamifyRedefined/Llama3-summarization")
+        self.llama_processor = LlamaProcessing("RoamifyRedefined/finetuned-summarization-llama3")
 
     def pipeline_processing_t5(self, document):
         count = 1

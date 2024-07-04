@@ -26,14 +26,13 @@ class LlamaProcessing:
 
     def predict_summary(self, text):
         prompt = alpaca_prompt.format(
-            "Give a brief description:",  # instruction
-            text,  # input
-            ""  # output - leave this blank for generation!
+            "Summarize the following text briefly starting with the name of the attraction.", # instruction
+            text, # input
+            "" # output - leave this blank for generation!
         )
         inputs = self.tokenizer(prompt, return_tensors="pt").to(self.model.device)
 
         text_streamer = TextStreamer(self.tokenizer)
         result = self.model.generate(**inputs, max_new_tokens=64, streamer=text_streamer)
-
+        
         return self.tokenizer.decode(result[0], skip_special_tokens=True)
-
