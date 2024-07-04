@@ -13,8 +13,8 @@ class NLP_Processor:
     def NLP_Processing(self, webscraped_text):
         self.text = webscraped_text
         spacy_processed_text = self.spacy_nlp()
-        attractions = self.sentence_processing(spacy_processed_text)
-        processed_data = self.word_tokenize(attractions)
+        attractions, attraction_names = self.sentence_processing(spacy_processed_text)
+        processed_data = self.word_tokenize(attractions, attraction_names)
         return processed_data
 
 
@@ -28,6 +28,7 @@ class NLP_Processor:
         sentences_processed = []
         current_index = 0
         attractions = {}
+        attractions_names = {}
         for sentence in sentences:
             s = sentence.split("\n")
             for i in s:
@@ -43,13 +44,14 @@ class NLP_Processor:
                     attractions[current_index] = ""
             
             else:
-                
+                if "Image" in sentence:
+                    attractions_names[current_index] = attractions[current_index]
+                    continue
                 if current_index != 0:
                     attractions[current_index] += (sentence + " ")
-
-        return attractions
+        return attractions, attractions_names
     
-    def word_tokenize(self, attraction_data):
+    def word_tokenize(self, attraction_data, attraction_data_names):
         processed_data = {}
         attractions = {}
         for id, attraction in attraction_data.items():
@@ -63,6 +65,6 @@ class NLP_Processor:
                 name += (words[i] + " ")
 
             words = [w for w in words if w.isalnum() and  w != ":" and w != "-" and w.lower() != "image" and w.lower() != "credit" and w.lower() != "source"]
-            attractions[name] = " ".join(words)
-
+            attractions[attraction_data_names[id]] = " ".join(words)
+        
         return attractions
