@@ -43,6 +43,7 @@ class NLP_Processor:
                     attractions[current_index] = ""
             
             else:
+                
                 if current_index != 0:
                     attractions[current_index] += (sentence + " ")
 
@@ -61,9 +62,7 @@ class NLP_Processor:
                     break
                 name += (words[i] + " ")
 
-            print(name)
             words = [w for w in words if w.isalnum() and  w != ":" and w != "-" and w.lower() != "image" and w.lower() != "credit" and w.lower() != "source"]
             attractions[name] = " ".join(words)
 
         return attractions
-    
