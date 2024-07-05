@@ -27,7 +27,7 @@ body {
   box-sizing: border-box;
   border-bottom-left-radius: 10px;
   border-bottom-right-radius: 10px;
-  position: relative; /* Added position: relative */
+  position: relative;
 }
 
 .app-name {
@@ -46,7 +46,7 @@ body {
 .main-content {
   scroll-behavior: smooth;
   color: #251F48;
-  padding: 2rem 0; /* Add padding to main content if needed */
+  padding: 2rem 0;
   z-index: 2;
 }
 
@@ -66,16 +66,16 @@ body {
   flex-direction: column;
   align-items: center;
   margin-top: 20px;
-  justify-content: center; /* Ensure the content is centered vertically */
-  width: 100%; /* Take full width */
-  height: 100%; /* Take full height */
+  justify-content: center;
+  width: 100%;
+  height: 100%;
   z-index: 2;
 }
 
 .search-box {
   background-color: #4B3C87;
   color: white;
-  padding: 0.5rem 1rem; /* Adjust padding for better alignment */
+  padding: 0.5rem 1rem;
   width: 70%;
   height: 50px;
   border-radius: 50px;
@@ -85,14 +85,14 @@ body {
 }
 
 .search-icon {
-  width: 20px; /* Adjust size as needed */
+  width: 20px;
   height: 20px;
-  margin-right: 1rem; /* Add margin to separate the icon from the text */
+  margin-right: 1rem;
 }
 
 .search-input::placeholder {
   color: white;
-  text-align: left; /* Align text to the left */
+  text-align: left;
   font-family: "Mouse Memoirs", sans-serif;
   font-size: 1.5rem;
 }
@@ -102,14 +102,13 @@ body {
   background-color: transparent;
   border: none;
   width: inherit;
-  font-size: 1.5rem;;
+  font-size: 1.5rem;
   outline: none;
   resize: none;
   font-family: 'Mouse Memoirs', sans-serif;
-  padding: 0; /* Remove padding from the input */
-  margin: 0; /* Remove margin from the input */
+  padding: 0;
+  margin: 0;
 }
-
 
 .cloud-2 {
   top: 45%;
@@ -203,7 +202,7 @@ body {
 }
 
 .footer-btn img {
-  width: 40px; /* Adjust size as needed */
+  width: 40px;
   height: 40px;
 }
 
@@ -213,18 +212,32 @@ body {
 }
 
 
+.cards-container {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  max-height: 70vh;
+  padding: 0 1rem;
+  margin-top: 1rem;
+  scrollbar-width: none; 
+}
+
+.cards-container::-webkit-scrollbar {
+  display: none; 
+}
+
 .card {
   background: linear-gradient(135deg, #FFFFFF 0%, #F0F0F0 100%);
   border: none;
   border-radius: 20px;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-  margin: 20px;
   padding: 20px;
   transition: transform 0.3s, box-shadow 0.3s;
-  width: 80%;
-  max-width: 400px;
-  margin: 20px auto; 
-  text-align: center; 
+  width: 80%; 
+  max-width: 600px; 
+  margin: 20px auto;
+  text-align: center;
+  position: relative;
 }
 
 .card:hover {
@@ -234,15 +247,18 @@ body {
 
 .card h2 {
   margin: 0 0 15px;
-  font-size: 1.8rem;
+  font-size: 2.5rem; 
   color: #2E265A;
   transition: color 0.3s;
+  background-color: rgba(46, 38, 90, 0.1);
+  padding: 15px; 
+  border-radius: 10px; 
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
 }
 
 .card h2:hover {
-  color: #FFD700;
+  color: #FFD700; /* Highlight color on hover */
 }
-
 .card p {
   margin: 0;
   font-size: 1.1rem;
@@ -290,4 +306,48 @@ body {
 .card:hover::after {
   opacity: 1;
   transform: scale(1);
+}
+
+.cards-container {
+  scroll-behavior: smooth;
+}
+
+
+.loading-bar {
+  position: fixed;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 20px; 
+  background-color: #F0F0F0; 
+  z-index: 1000;
+  overflow: hidden; 
+  transform: translateY(-50%); 
+  border-radius: 10px; 
+}
+
+.loading-bar::before {
+  content: '';
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #4A90E2; 
+  animation: loading 2s infinite linear;
+  transform-origin: left;
+  border-radius: 10px;
+}
+
+@keyframes loading {
+  0% {
+    transform: scaleX(0);
+  }
+  50% {
+    transform: scaleX(0.5);
+  }
+  100% {
+    transform: scaleX(1);
+  }
 }

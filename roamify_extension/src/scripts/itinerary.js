@@ -148,6 +148,13 @@ function fetchTravelTriangleData(linksToFetch) {
 function handleHtmlContents(contents) {
   const preElement = document.getElementById('main-content');
   preElement.textContent = '';
+
+
+  const loadingBar = document.createElement('div');
+  loadingBar.className = 'loading-bar';
+  preElement.appendChild(loadingBar);
+
+  
   let content = '';
 
   let isFirstParagraph = true;
@@ -184,6 +191,7 @@ function handleHtmlContents(contents) {
 
   processItinerary()
     .then(response => {
+      preElement.removeChild(loadingBar);
       displayCards(response);
     })
     .catch(error => {
@@ -216,10 +224,12 @@ function extractAttractions(doc) {
 
   return attractionsList;
 }
-
 function displayCards(response) {
   const preElement = document.getElementById('main-content');
   preElement.textContent = '';
+
+  const cardsContainer = document.createElement('div');
+  cardsContainer.className = 'cards-container';
 
   for (const [key, value] of Object.entries(response)) {
     const card = document.createElement('div');
@@ -233,6 +243,8 @@ function displayCards(response) {
     cardBody.textContent = value;
     card.appendChild(cardBody);
 
-    preElement.appendChild(card);
+    cardsContainer.appendChild(card);
   }
+
+  preElement.appendChild(cardsContainer);
 }
