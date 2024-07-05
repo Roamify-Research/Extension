@@ -90,6 +90,7 @@ function extractFlightDetails(url) {
     'LON': 'London', 'PAR': 'Paris', 'NYC': 'New York', 'AJL': 'Mizoram', 'DIU': 'Diu', 'SLV': 'Shimla', 'DED': 'Dehradun'
   };
 
+
   let matches = url.match(/[A-Z]{3}/g);
   if (matches && matches.length >= 2) {
     let [srcCode, dstCode] = matches;
@@ -183,9 +184,7 @@ function handleHtmlContents(contents) {
 
   processItinerary()
     .then(response => {
-      for (const [key, value] of Object.entries(response)) {
-        preElement.textContent += `${key}: ${value}\n\n`;
-      }
+      displayCards(response);
     })
     .catch(error => {
       console.error('Error processing the itinerary:', error);
@@ -216,4 +215,24 @@ function extractAttractions(doc) {
   }
 
   return attractionsList;
+}
+
+function displayCards(response) {
+  const preElement = document.getElementById('main-content');
+  preElement.textContent = '';
+
+  for (const [key, value] of Object.entries(response)) {
+    const card = document.createElement('div');
+    card.className = 'card';
+
+    const cardHeader = document.createElement('h2');
+    cardHeader.textContent = key;
+    card.appendChild(cardHeader);
+
+    const cardBody = document.createElement('p');
+    cardBody.textContent = value;
+    card.appendChild(cardBody);
+
+    preElement.appendChild(card);
+  }
 }
