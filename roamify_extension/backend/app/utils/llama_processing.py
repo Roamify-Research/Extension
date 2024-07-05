@@ -17,18 +17,22 @@ class LlamaProcessing:
     def __init__(self, model_path):
         self.model_path = model_path
         self.tokenizer = AutoTokenizer.from_pretrained(model_path)
-        self.model = AutoModelForCausalLM.from_pretrained(model_path)
+        self.model = AutoModelForCausalLM.from_pretrained(
+            model_path,
+            config={
+                "repetition_penalty": 2.0,
+            }
+        )
 
     def predict_summary(self, text):
         prompt = alpaca_prompt.format(
-            "Summarize the following text briefly starting with the name of the attraction.",  # instruction
-            text,  # input
-            ""  # output - leave this blank for generation!
+            "Summarize the following text briefly starting with the name of the attraction.", # instruction
+            text, # input
+            "" # output - leave this blank for generation!
         )
         inputs = self.tokenizer(prompt, return_tensors="pt").to(self.model.device)
 
         text_streamer = TextStreamer(self.tokenizer)
         result = self.model.generate(**inputs, max_new_tokens=64, streamer=text_streamer)
-
+        
         return self.tokenizer.decode(result[0], skip_special_tokens=True)
-

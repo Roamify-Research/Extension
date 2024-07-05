@@ -16,7 +16,7 @@ def process_text():
         text = data['text']
 
         # Process the text
-        processed_data = pipeline_processor.pipeline_processing(text)
+        processed_data = pipeline_processor.pipeline_processing_llama(text)
         print(processed_data)
         return processed_data
 

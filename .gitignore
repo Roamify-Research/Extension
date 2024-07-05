@@ -3,4 +3,6 @@ roamify_extension/backend/__pycache__/
 roamify_extension/backend/app/__pycache__/
 roamify_extension/backend/app/routes/__pycache__/
 roamify_extension/backend/.venv/
+roamify_extension/backend/app/utils/.venv/
+roamify_extension/backend/app/utils/llama_model/
 roamify_extension/backend/app/utils/__pycache__/
