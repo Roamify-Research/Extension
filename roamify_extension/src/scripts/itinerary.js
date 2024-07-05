@@ -1,5 +1,5 @@
 const backend = (data) => {
-  const API_URL = 'http://localhost:5000/process';
+  const API_URL = 'http://192.168.3.126:5000/process';
 
   const processItinerary = async () => {
     const response = await fetch(API_URL, {
