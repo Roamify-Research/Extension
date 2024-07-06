@@ -351,3 +351,14 @@ body {
     transform: scaleX(1);
   }
 }
+
+
+.loading-message {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 2rem;
+  color: #2E265A;
+  font-family: 'Mouse Memoirs', sans-serif;
+}

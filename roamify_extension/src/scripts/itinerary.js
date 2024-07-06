@@ -1,5 +1,5 @@
 const backend = (data) => {
-  const API_URL = 'http://192.168.3.126:5000/process';
+  const API_URL = 'http://192.168.3.126:5001/process';
 
   const processItinerary = async () => {
     const response = await fetch(API_URL, {
@@ -150,9 +150,17 @@ function handleHtmlContents(contents) {
   preElement.textContent = '';
 
 
+
+
+  const message = document.createElement('div');
+  message.className = 'loading-message';
+  message.textContent = 'Crafting Your Perfect Itinerary...';
+
   const loadingBar = document.createElement('div');
   loadingBar.className = 'loading-bar';
+  
   preElement.appendChild(loadingBar);
+  preElement.appendChild(message);
 
   
   let content = '';
