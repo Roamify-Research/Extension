@@ -36,7 +36,8 @@ def process_text():
 
             if processed_data[name]:
                 processed_data.pop(name)
-            
+
+        print(processed_data)    
         return processed_data
 
     elif request.method == 'GET':
