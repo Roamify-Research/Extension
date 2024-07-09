@@ -32,7 +32,7 @@ def process_text():
             sentences.pop()
             
             processed_data[name] = ".".join(sentences)
-            processed_data[name] = res[index:]
+            processed_data[name] = res[index:] + "."
             
         return processed_data
 
