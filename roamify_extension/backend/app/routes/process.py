@@ -26,6 +26,12 @@ def process_text():
         for name, details in processed_data.items():
             res = processed_data[name]
             index = res.find("### Response:\n") + len("### Response:\n")
+            end_index = res.find('### Explanation:')
+            result = res[index:end_index]
+            sentences = result.split(".")
+            sentences.pop()
+            
+            processed_data[name] = ".".join(sentences)
             processed_data[name] = res[index:]
             
         return processed_data
