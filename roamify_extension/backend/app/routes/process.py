@@ -33,6 +33,9 @@ def process_text():
             
             processed_data[name] = ".".join(sentences)
             processed_data[name] = res[index:] + "."
+
+            if processed_data[name]:
+                processed_data.pop(name)
             
         return processed_data
 
