@@ -1,8 +1,8 @@
 .DS_Store
-roamify_extension/backend/__pycache__/
-roamify_extension/backend/app/__pycache__/
-roamify_extension/backend/app/routes/__pycache__/
-roamify_extension/backend/.venv/
-roamify_extension/backend/app/utils/.venv/
-roamify_extension/backend/app/utils/llama_model/
-roamify_extension/backend/app/utils/__pycache__/
+backend/__pycache__/
+backend/app/__pycache__/
+backend/app/routes/__pycache__/
+backend/.venv/
+backend/app/utils/.venv/
+backend/app/utils/llama_model/
+backend/app/utils/__pycache__/
