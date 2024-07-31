@@ -37,16 +37,39 @@ document.addEventListener('DOMContentLoaded', () => {
     dayCountSpan.textContent = dayCount;
   });
 
-  planBtn.addEventListener('click', () => {
+  planBtn.addEventListener('click', async () => {
     const destination = searchInput.value.trim();
     if (destination) {
       const link = `https://traveltriangle.com/blog/places-to-visit-in-${destination.toLowerCase()}/`;
       fetchTravelTriangleData([{ dst: destination, link }]);
     } else {
-      processOpenTabs();
+      const activeTabUrl = await getActiveTabUrl();
+      if (activeTabUrl) {
+        const flightDetails = await extractFlightDetails(activeTabUrl);
+        if (flightDetails && flightDetails.dst) {
+          const link = `https://traveltriangle.com/blog/places-to-visit-in-${flightDetails.dst.toLowerCase()}/`;
+          fetchTravelTriangleData([{ dst: flightDetails.dst, link }]);
+        } else {
+          processOpenTabs();
+        }
+      } else {
+        processOpenTabs();
+      }
     }
   });
 });
+
+async function getActiveTabUrl() {
+  return new Promise((resolve) => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (tabs.length > 0) {
+        resolve(tabs[0].url);
+      } else {
+        resolve(null);
+      }
+    });
+  });
+}
 
 function processOpenTabs() {
   chrome.tabs.query({}, (tabs) => {
@@ -62,13 +85,18 @@ function processOpenTabs() {
         (results) => {
           processedCount++;
           if (results && results[0]) {
-            let flightDetails = extractFlightDetails(tab.url);
-            if (flightDetails) {
-              flightInfo.push({ url: tab.url, ...flightDetails });
+            extractFlightDetails(tab.url).then(flightDetails => {
+              if (flightDetails) {
+                flightInfo.push({ url: tab.url, ...flightDetails });
+              }
+              if (processedCount === tabs.length) {
+                displayFlightInfo(flightInfo);
+              }
+            });
+          } else {
+            if (processedCount === tabs.length) {
+              displayFlightInfo(flightInfo);
             }
-          }
-          if (processedCount === tabs.length) {
-            displayFlightInfo(flightInfo);
           }
         }
       );
@@ -80,16 +108,14 @@ function getHtmlContent() {
   return document.documentElement.outerHTML;
 }
 
-function extractFlightDetails(url) {
-  const airportCodes = {
-    'BOM': 'Mumbai', 'BLR': 'Bangalore', 'DEL': 'Delhi', 'HYD': 'Hyderabad', 'MAA': 'Chennai', 'CCU': 'Kolkata', 'GOI': 'Goa', 'JAI': 'Jaipur',
-    'AMD': 'Ahmedabad', 'PNQ': 'Pune', 'MYQ': 'Mysore', 'CCJ': 'Kozhikode', 'JFK': 'New York', 'LGA': 'New York', 'EWR': 'New York', 'BHB': 'Bhubaneswar',
-    'DCA': 'Washington DC', 'IAD': 'Washington DC', 'LAS': 'Las Vegas', 'SAN': 'San Diego', 'MCO': 'Orlando', 'ORD': 'Chicago', 'MDW': 'Chicago', 'MIA': 'Miami',
-    'PHX': 'Arizona', 'TPA': 'Tampa', 'RSW': 'Florida', 'FLL': 'Florida', 'IXC': 'Chandigarh', 'JDH': 'Jodhpur', 'SHL': 'Meghalaya', 'IMF': 'Manipur',
-    'DMU': 'Manipur', 'DIB': 'Assam', 'GAU': 'Assam', 'DAI': 'Diu', 'DED': 'Rishikesh', 'IXZ': 'Andaman & Nicobar', 'IXA': 'Tripura', 'DMU': 'Nagaland',
-    'LON': 'London', 'PAR': 'Paris', 'NYC': 'New York', 'AJL': 'Mizoram', 'DIU': 'Diu', 'SLV': 'Shimla', 'DED': 'Dehradun'
-  };
+async function loadAirportCodes() {
+  const response = await fetch('scripts/airport_dict.json'); // Adjust the path to your JSON file
+  const airportCodes = await response.json();
+  return airportCodes;
+}
 
+async function extractFlightDetails(url) {
+  const airportCodes = await loadAirportCodes();
 
   let matches = url.match(/[A-Z]{3}/g);
   if (matches && matches.length >= 2) {
@@ -149,9 +175,6 @@ function handleHtmlContents(contents) {
   const preElement = document.getElementById('main-content');
   preElement.textContent = '';
 
-
-
-
   const message = document.createElement('div');
   message.className = 'loading-message';
   message.textContent = 'Crafting Your Perfect Itinerary...';
@@ -162,9 +185,7 @@ function handleHtmlContents(contents) {
   preElement.appendChild(loadingBar);
   preElement.appendChild(message);
 
-  
   let content = '';
-
   let isFirstParagraph = true;
 
   contents.forEach(item => {
@@ -232,6 +253,7 @@ function extractAttractions(doc) {
 
   return attractionsList;
 }
+
 function displayCards(response) {
   const preElement = document.getElementById('main-content');
   preElement.textContent = '';
