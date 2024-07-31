@@ -6,7 +6,7 @@ class Pipeline:
     def __init__(self):
         self.nlp_processor = NLP_Processor()
         self.t5_processor = T5Processor()
-        self.llama_processor = LlamaProcessing("RoamifyRedefined/finetuned-summarization-llama3")
+        self.llama_processor = LlamaProcessing("RoamifyRedefined/Llama3-summarization")
 
     def pipeline_processing_t5(self, document):
         count = 1
