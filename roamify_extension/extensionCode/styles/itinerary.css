@@ -1,0 +1,252 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #ffffff;
+  color: #333;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 30px; /* Increased padding for a larger top bar */
+  background: linear-gradient(90deg, #251F48 0%, #3A2F70 100%); /* Added gradient for a better look */
+  color: #ffffff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Added shadow for depth */
+  position: relative;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 4.5em; /* Increased font size for better readability */
+}
+
+.account-button {
+  width: 50px; /* Increased size for better visibility */
+  height: 50px; /* Increased size for better visibility */
+  background-image: url('../assets/profile_icon.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  outline: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Added shadow for depth */
+  transition: transform 0.2s ease; /* Smooth transition for hover effect */
+}
+
+.account-button:hover {
+  transform: scale(1.1); /* Slightly enlarges the button on hover */
+}
+
+.account-dropdown {
+  display: none;
+  position: absolute;
+  width: 180px;
+  height: 310px;
+  right: 20px; /* Adjusted position to align with increased padding */
+  top: 60px; /* Adjusted position to align with increased top bar height */
+  background-color: #fff;
+  color: #333;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+  z-index: 1000;
+}
+
+.account-dropdown.active {
+  display: block;
+}
+
+.account-dropdown img {
+  width: 90px;
+  height: 90px;
+  padding-left: 35px;
+  border-radius: 20%;
+  margin: 10px;
+}
+
+.account-dropdown .options {
+  padding: 10px;
+}
+
+.account-dropdown .options a {
+  display: flex;
+  font-size: 1.5em;
+  align-items: center;
+  text-decoration: none;
+  color: #333;
+  border-top: 1px solid #ddd;
+}
+
+.account-dropdown .options a img {
+  width: 15px;
+  height: 15px;
+}
+
+.account-dropdown .options a:hover {
+  background-color: #f0f0f0;
+}
+
+main {
+  padding: 20px;
+}
+
+.greeting-text {
+  font-size: 2.25em;
+  margin: 20px 0;
+  text-align: left; 
+}
+
+.destination-prompt {
+  margin-top: 20px;
+  padding-left: 11px;
+  font-size: 1.7em;
+  text-align: left; 
+}
+
+.destination-container {
+  margin-top: 10px;
+  position: relative;
+  max-width: 600px; /* Restrict maximum width */
+  margin-left: auto;
+  margin-right: auto; /* Center container */
+}
+
+#destinationInput {
+  padding: 12px 16px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 1.2em; /* Increased font size */
+  width: 90%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Added shadow for depth */
+  transition: border-color 0.2s ease; /* Smooth transition for border color */
+  border-radius: 15px;
+}
+
+#destinationInput:focus {
+  border-color: #251F48; /* Highlight border color on focus */
+  outline: none; /* Remove default outline */
+}
+
+.suggestions-container {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  border-radius: 5px;
+  background-color: #D9D9D9;
+  z-index: 1000;
+  display: none;
+  max-height: 200px; /* Restrict height to prevent overflow */
+  overflow-y: auto; /* Scroll if too many suggestions */
+}
+
+.suggestion-item {
+  padding: 10px;
+  cursor: pointer;
+}
+
+.suggestion-item:hover {
+  background-color: #f0f0f0;
+}
+
+.predefined-options-container {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  justify-content: flex-end;
+}
+
+.predefined-option {
+  padding: 7px;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  background-color: #f9f9f9;
+  cursor: pointer;
+  font-size: 1.5em;
+  text-align: center;
+  transition: background-color 0.3s ease;
+}
+
+.predefined-option:hover {
+  background-color: #e0e0e0;
+}
+
+.day-prompt {
+  margin-top: 20px;
+  padding-left: 11px;
+  font-size: 1.7em;
+  text-align: left; 
+}
+
+.day-container {
+  margin-top: 20px;
+}
+
+.day-slider {
+  width: 100%;
+  -webkit-appearance: none;
+  background-color: #ddd;
+  height: 10px;
+  border-radius: 10px;
+  outline: none;
+  cursor: pointer;
+}
+
+.day-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background-color: #3A2F70;
+  cursor: pointer;
+}
+
+.day-slider::-moz-range-thumb {
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background-color: #3A2F70;
+  cursor: pointer;
+}
+
+.day-label {
+  display: inline-block;
+  margin-top: 10px;
+  margin-left: 45%;
+  font-size: 1.75em;
+  text-align: center;
+}
+
+.generate-itinerary{
+  padding-top: 20px;
+  align-content: center;
+}
+
+/* Button CSS */
+.generate-itinerary-button {
+  display: block;
+  padding: 10px 20px;
+  font-size: 1.5em;
+  color: #fff;
+  background-color: #3A2F70;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  margin: 0 auto; 
+}
+
+.generate-itinerary-button:hover {
+  background-color: #251F48;
+  transform: scale(1.05);
+}
+
+.generate-itinerary-button:active {
+  background-color: #1A1A1A;
+}
