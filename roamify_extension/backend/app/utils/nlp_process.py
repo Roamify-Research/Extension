@@ -67,25 +67,28 @@ class NLP_Processor:
         return attractions
     
     def itenary_processing(self, itenary):
-        days_dict = {}
+        matches = re.findall(r'(\*\*Day [0-9]+:.*?\*\*)\n\n(.*?)(?=\n\n\*\*Day [0-9]+:|\Z)', itenary, re.DOTALL)
 
-        # Use regular expression to find all day headings and their respective content
-        matches = re.findall(r'\([^]+)\\n(.?)(?=\n\*|$)', itenary, re.DOTALL)
+        days_dict = {}
 
         # Iterate over matches and store them in the dictionary
         for match in matches:
-            day, content = match
-            days_dict[day.strip()] = content.strip()
+            day_heading = match[0].strip('*')  # Clean the day heading
+            content = match[1].strip()
+            days_dict[day_heading] = content
 
+        # Tokenize and clean the content for each day
         itenary_dict = {}
-        # Display the dictionary
-        for i in days_dict:
-            itenary_dict[i] = []
-            for j in days_dict[i].split("\n"):
-                itenary_dict[i].append(j.replace("•⁠  ⁠", "").strip())
+        for day, content in days_dict.items():
+            itenary_dict[day] = []
+            for line in content.split('\n'):
+                cleaned_line = line.strip().replace('*', '').strip()
+                if cleaned_line:
+                    itenary_dict[day].append(cleaned_line)
+
+        print(itenary_dict)
 
         return itenary_dict
-
 
 # data = open("scraped.txt","r").read()
 

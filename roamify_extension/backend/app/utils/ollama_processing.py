@@ -8,7 +8,7 @@ class ollama_processor:
         self.headers = {
             'Content-Type': 'application/json'
         }
-    def ollama_processor(self, attractions:dict, days):
+    def ollama_attraction(self, attractions:dict, days):
         prompt = f"Generate an detailed itinerary for me for a {days} day trip and here are the suggested places I would like to cover:\n"
 
         # prompt = f"Generate an detailed itinerary for me for a {days} day trip and these are the user preferences I have: Historical {historical} here are the suggested places I would like to cover:\n"
@@ -20,6 +20,7 @@ class ollama_processor:
             count+=1
         payload = {"model":"llama3.1", "prompt":prompt, "stream":False}
         response = requests.post(self.url, headers=self.headers, json=payload)
+        print(response.json()['response'])
         return response.json()['response']
            
     def ollama_processor(self, destination_name:str, days):

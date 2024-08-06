@@ -266,6 +266,12 @@ function displayCards(response) {
   cardsContainer.className = 'cards-container';
 
   for (const [key, value] of Object.entries(response)) {
+
+    let body = '';
+    for (const [subkey] of Object.entries(value)) {
+      body += value[subkey] + '\n';
+    }
+
     const card = document.createElement('div');
     card.className = 'card';
 
@@ -274,7 +280,7 @@ function displayCards(response) {
     card.appendChild(cardHeader);
 
     const cardBody = document.createElement('p');
-    cardBody.textContent = value;
+    cardBody.textContent = body;
     card.appendChild(cardBody);
 
     cardsContainer.appendChild(card);

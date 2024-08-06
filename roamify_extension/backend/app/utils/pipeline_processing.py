@@ -90,7 +90,7 @@ class Pipeline:
             count += 1
             processed_document[key] = result
         
-        itenary_text = self.ollama_processor.ollama_processor(processed_document, days)
+        itenary_text = self.ollama_processor.ollama_attraction(processed_document, days)
         return self.nlp_processor.itenary_processing(itenary_text)
     
     def ollama_processing(self, destination_name, days):
