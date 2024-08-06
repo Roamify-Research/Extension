@@ -70,19 +70,24 @@ class NLP_Processor:
         days_dict = {}
 
         # Use regular expression to find all day headings and their respective content
-        matches = re.findall(r'\([^]+)\\n(.?)(?=\n\*|$)', itenary, re.DOTALL)
+        matches = re.findall(r'\*Day [0-9]+:.*?\*.*?(?=\n\*Day [0-9]+:|\Z)', itenary, re.DOTALL)
 
         # Iterate over matches and store them in the dictionary
         for match in matches:
-            day, content = match
-            days_dict[day.strip()] = content.strip()
+            day_heading = re.search(r'\*Day [0-9]+:.*?\*', match).group().strip()
+            content = match.replace(day_heading, '').strip()
+            day_heading = day_heading.strip('*').strip()  # Clean the day heading
+            days_dict[day_heading] = content
 
+        # Tokenize and clean the content for each day
         itenary_dict = {}
-        # Display the dictionary
-        for i in days_dict:
-            itenary_dict[i] = []
-            for j in days_dict[i].split("\n"):
-                itenary_dict[i].append(j.replace("•⁠  ⁠", "").strip())
+        for day, content in days_dict.items():
+            itenary_dict[day] = []
+            for line in content.split('\n'):
+                cleaned_line = line.strip().replace('•⁠  ⁠', '').strip()
+                if cleaned_line:
+                    itenary_dict[day].append(cleaned_line)
+
 
         return itenary_dict
 
