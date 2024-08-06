@@ -1,5 +1,7 @@
+let dayCount = 0;
+
 const backend = (data) => {
-  const API_URL = 'http://192.168.3.126:5001/process';
+  const API_URL = 'http://localhost:5000/process';
 
   const processItinerary = async () => {
     const response = await fetch(API_URL, {
@@ -23,7 +25,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const searchInput = document.querySelector('.search-input');
   const planBtn = document.querySelector('.plan-btn');
 
-  let dayCount = 0;
 
   decreaseBtn.addEventListener('click', () => {
     if (dayCount > 0) {
@@ -181,7 +182,7 @@ function handleHtmlContents(contents) {
 
   const loadingBar = document.createElement('div');
   loadingBar.className = 'loading-bar';
-  
+
   preElement.appendChild(loadingBar);
   preElement.appendChild(message);
 
@@ -215,7 +216,10 @@ function handleHtmlContents(contents) {
     content += displayContent;
   });
 
-  const data = { text: content };
+  const data = {
+    text: content,
+    day: dayCount
+  };
   const { processItinerary } = backend(data);
 
   processItinerary()

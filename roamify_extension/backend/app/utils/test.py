@@ -1,30 +1,33 @@
-# Load model directly
-from transformers import AutoTokenizer, AutoModelForCausalLM
+import transformers
+import torch
+import json
 
-tokenizer = AutoTokenizer.from_pretrained("meta-llama/Meta-Llama-3-8B")
-model = AutoModelForCausalLM.from_pretrained("meta-llama/Meta-Llama-3-8B")
+model_id = "meta-llama/Meta-Llama-3-8B-Instruct"
+hf_token = "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"  # Your Hugging Face token
 
-# Define the prompt template
-alpaca_prompt = """Below is an instruction that describes a task, paired with an input that provides further context. Write a response that appropriately completes the request.
-Instructions:
-{}
-Input:
-{}
-Response:
-{}"""
+# Load the text generation pipeline with specified settings
+pipe = transformers.pipeline(
+    "text-generation",
+    model=model_id,
+    tokenizer=model_id,
+    model_kwargs={"torch_dtype": torch.bfloat16},
+    device_map="cuda:0",  # Let the library handle device mapping automatically
+    token=hf_token  # Ensure authentication for loading the model
+)
 
-def predict_summary(text):
-    prompt = alpaca_prompt.format(
-        "Summarize the following text briefly starting with the name of the attraction.", # instruction
-        text, # input
-        "" # output - leave this blank for generation!
-    )
-    inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
+def return_output(text):
+    prompt = [
+        {
+            "role" : "user",
+            "content": f"Generate an detailed itinerary for me for a 5 day trip to Delhi and here are the suggested places I would like to cover:- {text}"
+        }
+    ]
 
-    result = model.generate(**inputs, max_new_tokens=64)
-    
-    return tokenizer.decode(result[0], skip_special_tokens=True)
+    # Generate text based on the prompt
+    generated_texts = pipe(prompt, max_length=256, pad_token_id=pipe.tokenizer.eos_token_id,
+                            temperature=0.7, top_p=0.9, top_k=50, num_beams=5, no_repeat_ngram_size=2,
+                            early_stopping=True)
+    generated_text = generated_texts[0]['generated_text']
+    print(generated_text)
 
-# Test the model
-text = "The Eiffel Tower is a wrought-iron lattice tower on the Champ de Mars in Paris, France. It is named after the engineer Gustave Eiffel, whose company designed and built the tower."
-print(predict_summary(text))
+    return generated_text

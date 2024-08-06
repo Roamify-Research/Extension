@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_cors import CORS
 from dotenv import load_dotenv
 import os
 
@@ -8,6 +9,7 @@ def create_app():
 
   # Initialize the Flask application
   app = Flask(__name__)
+  CORS(app)
 
   # Load configurations from config.py
   app.config.from_object('app.config')
