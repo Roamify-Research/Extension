@@ -19,20 +19,21 @@ def process_text():
     
     if request.method == 'POST':
         data = request.get_json()
+
+        if 'text' not in data:
+            days = data['day']
+            destination_name = ""
+            formatted_data = pipeline_processor.ollama_processing(destination_name, days)
+            return jsonify(formatted_data)
+            
         text = data['text']
         days = data['day']
-
+        # User preferences
+        # historical = data['historical']
+        # amusement = data['amusement']
+        # natural = data['natural']
         # Process the text
-        processed_data = pipeline_processor.t5_ollama_processing(text, days)
-        
-        formatted_data = {}
-        
-        days = re.findall(r"\*\*Day (\d+):", processed_data)
-        data = re.findall(r"\*\*Day \d+: (.+?)\*\*", processed_data, re.DOTALL)
-
-        for i in range(len(days)):
-            formatted_data[f"Day {days[i]}"] = data[i]
-
+        formatted_data = pipeline_processor.t5_ollama_processing(text, days)
         return jsonify(formatted_data)
 
     elif request.method == 'GET':
