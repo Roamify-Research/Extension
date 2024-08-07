@@ -1,7 +1,7 @@
 let dayCount = 0;
 
 const backend = (data) => {
-  const API_URL = 'http://localhost:5000/process';
+  const API_URL = 'http://localhost:5001/process';
 
   const processItinerary = async () => {
     const response = await fetch(API_URL, {
@@ -25,7 +25,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const searchInput = document.querySelector('.search-input');
   const planBtn = document.querySelector('.plan-btn');
 
-
   decreaseBtn.addEventListener('click', () => {
     if (dayCount > 0) {
       dayCount--;
@@ -46,12 +45,29 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       const activeTabUrl = await getActiveTabUrl();
       if (activeTabUrl) {
-        const flightDetails = await extractFlightDetails(activeTabUrl);
-        if (flightDetails && flightDetails.dst) {
-          const link = `https://traveltriangle.com/blog/places-to-visit-in-${flightDetails.dst.toLowerCase()}/`;
-          fetchTravelTriangleData([{ dst: flightDetails.dst, link }]);
+        if (activeTabUrl.includes('traveltriangle.com')) {
+          // If the current tab is a Travel Triangle tab, scrape it directly
+          chrome.scripting.executeScript(
+            {
+              target: { tabId: (await getActiveTab()).id },
+              func: getHtmlContent
+            },
+            (results) => {
+              if (results && results[0]) {
+                handleHtmlContents([{ url: activeTabUrl, html: results[0].result }]);
+              } else {
+                preElement.textContent = 'Failed to retrieve content from the Travel Triangle tab.';
+              }
+            }
+          );
         } else {
-          processOpenTabs();
+          const flightDetails = await extractFlightDetails(activeTabUrl);
+          if (flightDetails && flightDetails.dst) {
+            const link = `https://traveltriangle.com/blog/places-to-visit-in-${flightDetails.dst.toLowerCase()}/`;
+            fetchTravelTriangleData([{ dst: flightDetails.dst, link }]);
+          } else {
+            processOpenTabs();
+          }
         }
       } else {
         processOpenTabs();
@@ -60,16 +76,21 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-async function getActiveTabUrl() {
+async function getActiveTab() {
   return new Promise((resolve) => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (tabs.length > 0) {
-        resolve(tabs[0].url);
+        resolve(tabs[0]);
       } else {
         resolve(null);
       }
     });
   });
+}
+
+async function getActiveTabUrl() {
+  const tab = await getActiveTab();
+  return tab ? tab.url : null;
 }
 
 function processOpenTabs() {
@@ -266,12 +287,6 @@ function displayCards(response) {
   cardsContainer.className = 'cards-container';
 
   for (const [key, value] of Object.entries(response)) {
-
-    let body = '';
-    for (const [subkey] of Object.entries(value)) {
-      body += value[subkey] + '\n';
-    }
-
     const card = document.createElement('div');
     card.className = 'card';
 
@@ -280,7 +295,7 @@ function displayCards(response) {
     card.appendChild(cardHeader);
 
     const cardBody = document.createElement('p');
-    cardBody.textContent = body;
+    cardBody.textContent = value;
     card.appendChild(cardBody);
 
     cardsContainer.appendChild(card);
