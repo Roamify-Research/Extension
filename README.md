@@ -1,5 +1,6 @@
 # **Roamify Extension**
-## _Changing the Way World Travels_
+
+## _Roaming Redefined: Changing the Way the World Travels_
 
 [![Python 3.6+](https://img.shields.io/badge/python-3.6+-blue.svg)](https://www.python.org/downloads/release/python-360/)
 [![PyTorch](https://img.shields.io/badge/pytorch-1.8.1-red.svg?logo=pytorch)](https://pytorch.org/)
