@@ -13,7 +13,11 @@ body {
   z-index: 1000;
   align-items: center;
   padding: 10px 30px; /* Increased padding for a larger top bar */
-  background: linear-gradient(90deg, #251F48 0%, #3A2F70 100%); /* Added gradient for a better look */
+  background: linear-gradient(
+    90deg,
+    #251f48 0%,
+    #3a2f70 100%
+  ); /* Added gradient for a better look */
   color: #ffffff;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Added shadow for depth */
   position: relative;
@@ -28,7 +32,7 @@ body {
 .account-button {
   width: 50px; /* Increased size for better visibility */
   height: 50px; /* Increased size for better visibility */
-  background-image: url('../assets/profile_icon.png');
+  background-image: url("../assets/profile_icon.png");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -100,21 +104,21 @@ main {
 .greeting-text {
   font-size: 2.25em;
   margin: 20px 0;
-  text-align: left; 
+  text-align: left;
 }
 
 .destination-prompt {
   margin-top: 20px;
   padding-left: 11px;
   font-size: 1.7em;
-  text-align: left; 
+  text-align: left;
 }
 
-.fine-tune{
+.fine-tune {
   margin-top: 10px;
   padding-left: 11px;
   font-size: 1.9em;
-  text-align: left; 
+  text-align: left;
 }
 
 .destination-container {
@@ -137,7 +141,7 @@ main {
 }
 
 #destinationInput:focus {
-  border-color: #251F48; /* Highlight border color on focus */
+  border-color: #251f48; /* Highlight border color on focus */
   outline: none; /* Remove default outline */
 }
 
@@ -147,7 +151,7 @@ main {
   left: 0;
   width: 100%;
   border-radius: 5px;
-  background-color: #D9D9D9;
+  background-color: #d9d9d9;
   z-index: 1000;
   display: none;
   max-height: 200px; /* Restrict height to prevent overflow */
@@ -190,7 +194,7 @@ main {
   margin-top: 20px;
   padding-left: 11px;
   font-size: 1.7em;
-  text-align: left; 
+  text-align: left;
 }
 
 .day-container {
@@ -212,7 +216,7 @@ main {
   width: 25px;
   height: 25px;
   border-radius: 50%;
-  background-color: #3A2F70;
+  background-color: #3a2f70;
   cursor: pointer;
 }
 
@@ -220,7 +224,7 @@ main {
   width: 25px;
   height: 25px;
   border-radius: 50%;
-  background-color: #3A2F70;
+  background-color: #3a2f70;
   cursor: pointer;
 }
 
@@ -232,7 +236,7 @@ main {
   text-align: center;
 }
 
-.generate-itinerary{
+.generate-itinerary {
   padding-top: 20px;
   align-content: center;
 }
@@ -243,23 +247,23 @@ main {
   padding: 10px 20px;
   font-size: 1.5em;
   color: #fff;
-  background-color: #3A2F70;
+  background-color: #3a2f70;
   border: none;
   border-radius: 25px;
   cursor: pointer;
   text-align: center;
   text-decoration: none;
   transition: background-color 0.3s ease, transform 0.2s ease;
-  margin: 0 auto; 
+  margin: 0 auto;
 }
 
 .generate-itinerary-button:hover {
-  background-color: #251F48;
+  background-color: #251f48;
   transform: scale(1.05);
 }
 
 .generate-itinerary-button:active {
-  background-color: #1A1A1A;
+  background-color: #1a1a1a;
 }
 
 /* Style for the loading overlay */
@@ -269,7 +273,12 @@ main {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5); /* Darken the background with semi-transparent black */
+  background-color: rgba(
+    0,
+    0,
+    0,
+    0.5
+  ); /* Darken the background with semi-transparent black */
   display: flex;
   align-items: center; /* Center items vertically */
   justify-content: center; /* Center items horizontally */
@@ -347,7 +356,7 @@ main {
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background-color: #3A2F70;
+  background-color: #3a2f70;
   cursor: pointer;
 }
 
@@ -355,7 +364,7 @@ main {
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background-color: #3A2F70;
+  background-color: #3a2f70;
   cursor: pointer;
 }
 
@@ -431,7 +440,7 @@ main {
   bottom: 20px;
   right: 20px;
   z-index: 1000;
-  background-color: #3A2F70;
+  background-color: #3a2f70;
   color: white;
   border: none;
   border-radius: 50%;

@@ -12,7 +12,6 @@
 
 Welcome to the official repository of Roamify Chrome Extension. This repository contains the code and documentation for our innovative approach to providing personalized travel recommendations using a chrome extension.
 
-
 ## Table of Contents
 
 - [Introduction](#introduction)
@@ -21,11 +20,9 @@ Welcome to the official repository of Roamify Chrome Extension. This repository 
 - [Citing This Work](#citing-this-work)
 - [Acknowledgements](#acknowledgements)
 
-
 ## Introduction
 
-Roamify aims to revolutionize the travel experience by leveraging the power of machine learning to provide personalized recommendations through a google chrome extension. 
-
+Roamify aims to revolutionize the travel experience by leveraging the power of machine learning to provide personalized recommendations through a google chrome extension.
 
 ## Directory Structure
 
@@ -79,13 +76,11 @@ Extension/
 └── requirements.txt
 ```
 
-
 ## Extension Objectives
 
 1. **User-Friendly and Minimal Design**: Ensure the extension is easy to use for individuals of all age groups by maintaining a clean and intuitive interface.
 2. **Simplified Itinerary Creation**: Provide features that make it easier for users to create and manage travel itineraries with minimal effort.
 3. **Real-Time Data Scraping**: Enable the extension to directly scrape data from the current Google tab to generate detailed and relevant itineraries.
-
 
 ## Citing This Work
 

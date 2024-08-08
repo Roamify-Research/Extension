@@ -1,14 +1,22 @@
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 import nltk
 import re
+
+
 class T5Processor:
     def __init__(self):
-        self.tokenizer = AutoTokenizer.from_pretrained("Roamify/finetuned-summarization_t5")
-        self.model = AutoModelForSeq2SeqLM.from_pretrained("Roamify/finetuned-summarization_t5")
+        self.tokenizer = AutoTokenizer.from_pretrained(
+            "Roamify/finetuned-summarization_t5"
+        )
+        self.model = AutoModelForSeq2SeqLM.from_pretrained(
+            "Roamify/finetuned-summarization_t5"
+        )
 
     def predict_summary(self, document):
         device = self.model.device
-        tokenized = self.tokenizer([document], truncation=True, padding='longest', return_tensors='pt')
+        tokenized = self.tokenizer(
+            [document], truncation=True, padding="longest", return_tensors="pt"
+        )
         tokenized = {k: v.to(device) for k, v in tokenized.items()}
 
         # Increase max_length and add min_length
@@ -28,12 +36,14 @@ class T5Processor:
             early_stopping=True
         )
 
-        tokenized_result = tokenized_result.to('cuda')
-        predicted_summary = self.tokenizer.decode(tokenized_result[0], skip_special_tokens=True)
-        
-        text = re.sub(r'\s+', ' ',predicted_summary)  # Remove extra whitespaces
+        tokenized_result = tokenized_result.to("cuda")
+        predicted_summary = self.tokenizer.decode(
+            tokenized_result[0], skip_special_tokens=True
+        )
+
+        text = re.sub(r"\s+", " ", predicted_summary)  # Remove extra whitespaces
         sentences = nltk.sent_tokenize(text)  # Sentence tokenization
-        text = ' '.join(sentences)
+        text = " ".join(sentences)
         return text
 
     def predict(self, context):

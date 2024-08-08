@@ -3,5 +3,5 @@ import os
 
 app = create_app()
 
-if __name__ == '__main__':
-    app.run(port=os.getenv('FLASK_RUN_PORT', 5000))
+if __name__ == "__main__":
+    app.run(port=os.getenv("FLASK_RUN_PORT", 5000))

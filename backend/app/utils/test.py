@@ -2,7 +2,7 @@ import re
 from nltk.tokenize import sent_tokenize, word_tokenize
 import nltk
 
-nltk.download('punkt')
+nltk.download("punkt")
 
 itenary = """
 Here's a detailed 5-day itinerary for your trip to Delhi, covering all the suggested places:
@@ -37,13 +37,15 @@ This itinerary provides a good balance of history, culture, and relaxation, allo
 """
 
 # Use regular expression to find all day headings and their respective content
-matches = re.findall(r'(\*\*Day [0-9]+:.*?\*\*)\n\n(.*?)(?=\n\n\*\*Day [0-9]+:|\Z)', itenary, re.DOTALL)
+matches = re.findall(
+    r"(\*\*Day [0-9]+:.*?\*\*)\n\n(.*?)(?=\n\n\*\*Day [0-9]+:|\Z)", itenary, re.DOTALL
+)
 
 days_dict = {}
 
 # Iterate over matches and store them in the dictionary
 for match in matches:
-    day_heading = match[0].strip('*')  # Clean the day heading
+    day_heading = match[0].strip("*")  # Clean the day heading
     content = match[1].strip()
     days_dict[day_heading] = content
 
@@ -51,8 +53,8 @@ for match in matches:
 itenary_dict = {}
 for day, content in days_dict.items():
     itenary_dict[day] = []
-    for line in content.split('\n'):
-        cleaned_line = line.strip().replace('*', '').strip()
+    for line in content.split("\n"):
+        cleaned_line = line.strip().replace("*", "").strip()
         if cleaned_line:
             itenary_dict[day].append(cleaned_line)
 
