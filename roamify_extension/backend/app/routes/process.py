@@ -29,11 +29,11 @@ def process_text():
         text = data['text']
         days = data['day']
         # User preferences
-        # historical = data['historical']
-        # amusement = data['amusement']
-        # natural = data['natural']
+        historical = data['historical']
+        amusement = data['amusement']
+        natural = data['natural']
         # Process the text
-        formatted_data = pipeline_processor.t5_ollama_processing(text, days)
+        formatted_data = pipeline_processor.t5_ollama_processing(text, days, historical, amusement, natural)
         return jsonify(formatted_data)
 
     elif request.method == 'GET':

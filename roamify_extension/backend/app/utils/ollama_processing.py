@@ -8,10 +8,10 @@ class ollama_processor:
         self.headers = {
             'Content-Type': 'application/json'
         }
-    def ollama_attraction(self, attractions:dict, days):
-        prompt = f"Generate an detailed itinerary for me for a {days} day trip and here are the suggested places I would like to cover:\n"
+    def ollama_attraction(self, attractions:dict, days, historical, amusement, natural):
+        # prompt = f"Generate an detailed itinerary for me for a {days} day trip and the user has rated {historical} for historical places  here are the suggested places I would like to cover:\n"
 
-        # prompt = f"Generate an detailed itinerary for me for a {days} day trip and these are the user preferences I have: Historical {historical} here are the suggested places I would like to cover:\n"
+        prompt = f"Generate an detailed itinerary for me for a {days} day trip and these are the user preferences I have: Historical {historical}, Amusement {amusement}, Natural {natural} places and here are the suggested places I would like to cover:\n"
         count = 1
         for name, details in attractions.items():
             prompt += f"{count}: {name.title()}\n"

@@ -1,75 +1,97 @@
-@font-face {
-  font-family: 'Mouse Memoirs';
-  src: url("../assets/MouseMemoirs-Regular.ttf");
-  font-weight: bolder;
-  font-style: normal;
-}
-
 body {
-  font-family: 'Poppins', sans-serif;
   margin: 0;
-  min-height: 100vh;
-  background: #251F48;
+  overflow: hidden;
   display: flex;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
-  overflow: hidden;
+  height: 100vh;
+  background-color: #515151;
 }
-
-.page {
+.splash-container, .main-container, .login-container {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.main-container {
+  color: white;
+  font-size: 4em;
+  transform: translateX(-100%);
   transition: transform 0.5s ease;
 }
-
-.page.slide-out {
-  transform: translateX(-100%);
-}
-
-.page.slide-in {
+.main-container.slide-in {
   transform: translateX(0);
 }
-
-.logo {
+.main-container.move-up {
   position: absolute;
-  top: 100px; /* Adjust this value as needed */
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100%;
+  top: -300px;
+  left: -60px;
+  font-size: 2.5em;
+  transition: top 1s ease, left 1s ease;
 }
-
-.button {
-  position: relative;
-  background-color: #AB85BA;
-  color: #251F48;
-  width: 40vh;
-  margin-top: 400px;
-  font-size: 450%;
-  font-family: "Mouse Memoirs", sans-serif;
-  height: 15vh;
-  border-radius: 20px;
+.login-container {
   display: flex;
-  justify-content: center; /* Center content horizontally within the button */
-  align-items: center; /* Center content vertically within the button */
-  overflow: hidden; /* Ensure the pseudo-element doesn't overflow */
-}
-
-.button::before {
-  content: '';
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #251F48;
+  color: white;
+  font-size: 1.5em;
   position: absolute;
-  top: 0;
-  left: -100%;
-  width: 200%;
-  height: 100%;
-  background: linear-gradient(120deg, transparent, #D4B3D6, transparent);
-  transition: all 0.5s ease;
-  opacity: 0; /* Initially hidden */
+  padding-top: 10;
+  bottom: 0;
+  height: 0;
+  width: 100%;
+  overflow: hidden;
+  transition: height 0.5s ease, transform 0.5s ease;
 }
-
-.button:hover::before {
-  left: 100%;
-  opacity: 1; /* Visible on hover */
+.login-container.slide-up {
+  height: 80%;
+  transform: translateY(0);
 }
-
-.button:hover {
+.empty-frame {
+  width: 80%;
+  max-width: 400px;
+  padding: 20px;
+  border: 2px solid white;
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.1);
+  position: relative; 
+  top: -20%; 
+}
+.empty-frame h2 {
+  margin-top: 0;
+  font-size: 2em;
+}
+.login-form, .signup-form {
+  display: flex;
+  flex-direction: column;
+}
+.login-form input, .signup-form input {
+  margin-bottom: 15px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background: #fff;
+  color: #000;
+  font-size: 1em;
+}
+.login-form button, .signup-form button {
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  background-color: #6c63ff;
+  color: white;
+  font-size: 1em;
   cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+.login-form button:hover, .signup-form button:hover {
+  background-color: #5754e7;
+}
+img {
+  max-width: 100%;
+  height: 100%;
 }

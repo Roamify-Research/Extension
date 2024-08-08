@@ -1,40 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Roamify</title>
-  <link rel="stylesheet" href="./styles/itinerary.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Page</title>
+    <link rel="stylesheet" href="styles/itinerary.css">
 </head>
+
 <body>
-  <header class="header">
-    <h1 class="app-name">ROAMIFY</h1>
-    <img src="./assets/profile.svg" class="profile-icon"/>
-  </header>
-  <img class="cloud-1" src="./assets/cloud_design.svg" alt="Cloud"/>
-  <img src="./assets/cloud_design.svg" class="cloud-2" alt="Cloud"/>
-  <img src="./assets/cloud_design.svg" class="cloud-3" alt="Cloud"/>
-  <main class="main-content" id="main-content">
-    <h2 class="welcome-message">Welcome back, Noel!</h2>
-    <div class="search-container">
-      <div class="search-box">
-        <img class="search-icon" src="./assets/search-icon.svg" alt="Search Icon"/>
-        <input type="text" class="search-input" placeholder="Search for a city"/>
-      </div>
-      <div class="days-container">
-        <span class="day-text">Number of days:</span>
-        <button class="day-btn" id="decrease-btn">-</button>
-        <span class="day-count" id="day-count">0</span>
-        <button class="day-btn" id="increase-btn">+</button>
-      </div>
-      <button class="plan-btn">Plan My Itinerary</button> 
-    </div>
-  </main>
-  <footer class="footer">
-    <img class="footer-btn" src="./assets/menu_icon.svg" alt="Menu Icon"/>
-    <img class="footer-btn" src="./assets/reload_icon.svg" alt="Reload Icon"/>
-    <img class="footer-btn" src="./assets/info_icon.svg" alt="Info Icon"/>
-  </footer>
-  <script src="./scripts/itinerary.js"></script>  
+    <header class="header">
+        <h1>ROAMIFY</h1>
+        <button class="account-button" id="accountButton"></button>
+        <div class="account-dropdown" id="accountDropdown">
+            <img src="assets/profile_icon.png" alt="Account Icon">
+            <div class="options">
+                <a href="#"><img src="assets/profile_icon.png" alt="Profile Icon" /> Profile</a>
+                <a href="#"><img src="assets/info_icon.png" alt="About Us Icon" /> About Us</a>
+                <a href="#"><img src="assets/guide_icon.png" alt="Guide Icon" /> Guide</a>
+                <a href="#"><img src="assets/new_chat_icon.png" alt="New Chat Icon" /> New Chat</a>
+                <a href="#"><img src="assets/logout_icon.png" alt="Logout Icon" /> Logout</a>
+            </div>
+        </div>
+    </header>
+    <main class="main-content" id="main-content">
+        <h2 class="greeting-text">Welcome back, Noel</h2>
+        <p class="destination-prompt">Where do you want to go?</p>
+        <div class="destination-container">
+            <input type="text" id="destinationInput" placeholder="Enter Destination">
+            <div id="suggestionsContainer" class="suggestions-container"></div>
+        </div>
+        <div class="predefined-options-container"></div>
+
+        <p class="day-prompt">How many Days are you planning to stay?</p>
+        <div class="day-container"></div>
+        <p class="fine-tune" id="fine-tune">Fine Tune</p>
+        <div class="frame-box" id="sliderFrame">
+            <div class="details-container"></div>
+        </div>
+        <div class="generate-itinerary">
+            <button class="generate-itinerary-button">
+                Generate Itinerary
+            </button>
+        </div>
+        <div id="main-content" class="main-box"></div>
+    </main>
+    <button class="floating-button" id="downloadButton">↓</button>
+    <script src="scripts/itinerary.js"></script>
 </body>
+
 </html>

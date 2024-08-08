@@ -78,7 +78,7 @@ class Pipeline:
             result[name] = processed_document[key]
         return result
     
-    def t5_ollama_processing(self, document, days):
+    def t5_ollama_processing(self, document, days, historical, amusement, natural):
         count = 1
         processed_document = self.nlp_processor.NLP_Processing(document)
         for key, text in processed_document.items():
@@ -90,7 +90,7 @@ class Pipeline:
             count += 1
             processed_document[key] = result
         
-        itenary_text = self.ollama_processor.ollama_attraction(processed_document, days)
+        itenary_text = self.ollama_processor.ollama_attraction(processed_document, days, historical, amusement, natural)
         return self.nlp_processor.itenary_processing(itenary_text)
     
     def ollama_processing(self, destination_name, days):

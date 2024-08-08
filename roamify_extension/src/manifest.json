@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Tab HTML Retriever with Sidebar",
+  "name": "ROAMIFY",
   "description": "An extension to get HTML content of all open tabs and display a sidebar.",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "background": {
     "service_worker": "scripts/background.js"
   },
@@ -10,7 +10,7 @@
     "default_path": "panel.html"
   },
   "action": {
-    "default_title": "Tab HTML Retriever"
+    "default_title": "ROAMIFY"
   },
   "options_ui": {
     "page": "options.html",
