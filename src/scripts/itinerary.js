@@ -1,13 +1,13 @@
 const backend = (data) => {
-  const API_URL = 'http://localhost:5001/process';
+  const API_URL = "http://localhost:5001/process";
 
   const processItinerary = async () => {
     const response = await fetch(API_URL, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json'
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify(data)
+      body: JSON.stringify(data),
     });
 
     return response.json();
@@ -21,44 +21,55 @@ let history_value = 0;
 let amusement_value = 0;
 let natural_value = 0;
 
-document.addEventListener('DOMContentLoaded', function () {
-  const accountButton = document.getElementById('accountButton');
-  const accountDropdown = document.getElementById('accountDropdown');
-  const destinationInput = document.getElementById('destinationInput');
-  const suggestionsContainer = document.getElementById('suggestionsContainer');
-  const predefinedOptionsContainer = document.querySelector('.predefined-options-container');
-  const dayContainer = document.querySelector('.day-container');
-  const additionalDataContainer = document.querySelector('.details-container')
-  const generateButton = document.querySelector('.generate-itinerary-button');
+document.addEventListener("DOMContentLoaded", function () {
+  const accountButton = document.getElementById("accountButton");
+  const accountDropdown = document.getElementById("accountDropdown");
+  const destinationInput = document.getElementById("destinationInput");
+  const suggestionsContainer = document.getElementById("suggestionsContainer");
+  const predefinedOptionsContainer = document.querySelector(
+    ".predefined-options-container"
+  );
+  const dayContainer = document.querySelector(".day-container");
+  const additionalDataContainer = document.querySelector(".details-container");
+  const generateButton = document.querySelector(".generate-itinerary-button");
 
   // Sample predefined options
-  const predefinedOptions = [
-    'Vietnam', 'Delhi', 'New York', 'Tokyo', 'Sydney'
-  ];
+  const predefinedOptions = ["Vietnam", "Delhi", "New York", "Tokyo", "Sydney"];
 
   // Sample range values for days
   const minDays = 1;
   const maxDays = 50;
 
   let destinations = [
-    'Paris', 'London', 'New York', 'Tokyo', 'Sydney', 'Rome',
-    'Berlin', 'Amsterdam', 'Barcelona', 'Lisbon'
+    "Paris",
+    "London",
+    "New York",
+    "Tokyo",
+    "Sydney",
+    "Rome",
+    "Berlin",
+    "Amsterdam",
+    "Barcelona",
+    "Lisbon",
   ];
 
   // Toggle account dropdown
-  accountButton.addEventListener('click', function () {
-    accountDropdown.classList.toggle('active');
+  accountButton.addEventListener("click", function () {
+    accountDropdown.classList.toggle("active");
   });
 
   // Hide account dropdown when clicking outside
-  document.addEventListener('click', function (event) {
-    if (!accountDropdown.contains(event.target) && !accountButton.contains(event.target)) {
-      accountDropdown.classList.remove('active');
+  document.addEventListener("click", function (event) {
+    if (
+      !accountDropdown.contains(event.target) &&
+      !accountButton.contains(event.target)
+    ) {
+      accountDropdown.classList.remove("active");
     }
   });
 
   async function loadAirportCodes() {
-    const response = await fetch('scripts/airport_dict.json'); // Adjust the path to your JSON file
+    const response = await fetch("scripts/airport_dict.json"); // Adjust the path to your JSON file
     const airportCodes = await response.json();
     return airportCodes;
   }
@@ -87,61 +98,64 @@ document.addEventListener('DOMContentLoaded', function () {
   populateDestinations();
 
   // Handle auto-complete
-  destinationInput.addEventListener('input', function () {
+  destinationInput.addEventListener("input", function () {
     const inputValue = this.value.toLowerCase();
-    suggestionsContainer.innerHTML = '';
+    suggestionsContainer.innerHTML = "";
     if (inputValue) {
-      const filteredDestinations = destinations.filter(destination =>
+      const filteredDestinations = destinations.filter((destination) =>
         destination.toLowerCase().includes(inputValue)
       );
-      filteredDestinations.forEach(destination => {
-        const div = document.createElement('div');
-        div.className = 'suggestion-item';
+      filteredDestinations.forEach((destination) => {
+        const div = document.createElement("div");
+        div.className = "suggestion-item";
         div.textContent = destination;
-        div.addEventListener('click', function () {
+        div.addEventListener("click", function () {
           destinationInput.value = this.textContent;
-          suggestionsContainer.innerHTML = '';
+          suggestionsContainer.innerHTML = "";
         });
         suggestionsContainer.appendChild(div);
       });
-      suggestionsContainer.style.display = filteredDestinations.length > 0 ? 'block' : 'none';
+      suggestionsContainer.style.display =
+        filteredDestinations.length > 0 ? "block" : "none";
     } else {
-      suggestionsContainer.style.display = 'none';
+      suggestionsContainer.style.display = "none";
     }
   });
 
   // Hide suggestions when clicking outside
-  document.addEventListener('click', function (event) {
-    if (!destinationInput.contains(event.target) && !suggestionsContainer.contains(event.target)) {
-      suggestionsContainer.style.display = 'none';
+  document.addEventListener("click", function (event) {
+    if (
+      !destinationInput.contains(event.target) &&
+      !suggestionsContainer.contains(event.target)
+    ) {
+      suggestionsContainer.style.display = "none";
     }
   });
 
   // Create predefined options dynamically
-  predefinedOptions.forEach(option => {
-    const div = document.createElement('div');
-    div.className = 'predefined-option';
+  predefinedOptions.forEach((option) => {
+    const div = document.createElement("div");
+    div.className = "predefined-option";
     div.textContent = option;
     div.dataset.value = option;
-    div.addEventListener('click', function () {
+    div.addEventListener("click", function () {
       destinationInput.value = this.dataset.value;
     });
     predefinedOptionsContainer.appendChild(div);
   });
 
-
   // Create a slider for selecting the number of days
-  const day_slider = document.createElement('input');
-  day_slider.type = 'range';
+  const day_slider = document.createElement("input");
+  day_slider.type = "range";
   day_slider.min = minDays;
   day_slider.max = maxDays;
   day_slider.value = minDays;
   day_slider.step = 1;
-  day_slider.className = 'day-slider';
+  day_slider.className = "day-slider";
 
   // Create a label to display the selected number of days
-  const dayLabel = document.createElement('span');
-  dayLabel.className = 'day-label';
+  const dayLabel = document.createElement("span");
+  dayLabel.className = "day-label";
   dayLabel.textContent = `${minDays} Days`;
 
   // Append the slider and label to the day container
@@ -149,39 +163,39 @@ document.addEventListener('DOMContentLoaded', function () {
   dayContainer.appendChild(dayLabel);
 
   // Update label when slider value changes
-  day_slider.addEventListener('input', function () {
+  day_slider.addEventListener("input", function () {
     dayLabel.textContent = `${this.value} Days`;
   });
   //additionalDataContainer
   const sliders = {};
   const createSlider = (min, max, initialValue, label, id) => {
-    const wrapper = document.createElement('div');
-    wrapper.className = 'slider-wrapper';
+    const wrapper = document.createElement("div");
+    wrapper.className = "slider-wrapper";
 
-    const topLabelContainer = document.createElement('div');
-    topLabelContainer.className = 'top-label-container';
+    const topLabelContainer = document.createElement("div");
+    topLabelContainer.className = "top-label-container";
 
-    const topLabel = document.createElement('span');
-    topLabel.className = 'top-label';
+    const topLabel = document.createElement("span");
+    topLabel.className = "top-label";
     topLabel.textContent = label;
 
-    const valueLabel = document.createElement('span');
-    valueLabel.className = 'value-label';
+    const valueLabel = document.createElement("span");
+    valueLabel.className = "value-label";
     valueLabel.textContent = initialValue;
 
     topLabelContainer.appendChild(topLabel);
     topLabelContainer.appendChild(valueLabel);
 
-    const slider = document.createElement('input');
-    slider.type = 'range';
+    const slider = document.createElement("input");
+    slider.type = "range";
     slider.min = min;
     slider.max = max;
     slider.value = initialValue;
     slider.step = 1;
-    slider.className = 'additional-slider';
+    slider.className = "additional-slider";
     slider.id = id; // Assign unique ID
 
-    slider.addEventListener('input', function () {
+    slider.addEventListener("input", function () {
       valueLabel.textContent = this.value;
     });
 
@@ -195,20 +209,21 @@ document.addEventListener('DOMContentLoaded', function () {
 
   //historical
   const sliderElements = [
-    createSlider(0, 5, 3, 'Historical', 'history'),
-    createSlider(0, 5, 3, 'Amusement', 'amusement'),
-    createSlider(0, 5, 3, 'Natural', 'natural')
-  ]
-  sliderElements.forEach(slider => additionalDataContainer.appendChild(slider));
+    createSlider(0, 5, 3, "Historical", "history"),
+    createSlider(0, 5, 3, "Amusement", "amusement"),
+    createSlider(0, 5, 3, "Natural", "natural"),
+  ];
+  sliderElements.forEach((slider) =>
+    additionalDataContainer.appendChild(slider)
+  );
 
   // Handle button click to store values and redirect
-  generateButton.addEventListener('click', async function () {
-    history_value = sliders['history'].value;
-    amusement_value = sliders['amusement'].value;
-    natural_value = sliders['natural'].value;
+  generateButton.addEventListener("click", async function () {
+    history_value = sliders["history"].value;
+    amusement_value = sliders["amusement"].value;
+    natural_value = sliders["natural"].value;
     const destination = destinationInput.value;
     days = day_slider.value;
-
 
     if (destination) {
       const link = `https://traveltriangle.com/blog/places-to-visit-in-${destination.toLowerCase()}/`;
@@ -216,18 +231,21 @@ document.addEventListener('DOMContentLoaded', function () {
     } else {
       const activeTabUrl = await getActiveTabUrl();
       if (activeTabUrl) {
-        if (activeTabUrl.includes('traveltriangle.com')) {
+        if (activeTabUrl.includes("traveltriangle.com")) {
           // If the current tab is a Travel Triangle tab, scrape it directly
           chrome.scripting.executeScript(
             {
               target: { tabId: (await getActiveTab()).id },
-              func: getHtmlContent
+              func: getHtmlContent,
             },
             (results) => {
               if (results && results[0]) {
-                handleHtmlContents([{ url: activeTabUrl, html: results[0].result }]);
+                handleHtmlContents([
+                  { url: activeTabUrl, html: results[0].result },
+                ]);
               } else {
-                preElement.textContent = 'Failed to retrieve content from the Travel Triangle tab.';
+                preElement.textContent =
+                  "Failed to retrieve content from the Travel Triangle tab.";
               }
             }
           );
@@ -273,12 +291,12 @@ function processOpenTabs() {
       chrome.scripting.executeScript(
         {
           target: { tabId: tab.id },
-          func: getHtmlContent
+          func: getHtmlContent,
         },
         (results) => {
           processedCount++;
           if (results && results[0]) {
-            extractFlightDetails(tab.url).then(flightDetails => {
+            extractFlightDetails(tab.url).then((flightDetails) => {
               if (flightDetails) {
                 flightInfo.push({ url: tab.url, ...flightDetails });
               }
@@ -302,13 +320,14 @@ function getHtmlContent() {
 }
 
 function displayFlightInfo(info) {
-  const preElement = document.getElementById('main-content');
-  preElement.textContent = '';
+  const preElement = document.getElementById("main-content");
+  preElement.textContent = "";
 
   if (info.length === 0) {
-    preElement.textContent = 'No flight booking websites found or no destinations detected.';
+    preElement.textContent =
+      "No flight booking websites found or no destinations detected.";
   } else {
-    let linksToFetch = info.map(item => {
+    let linksToFetch = info.map((item) => {
       return {
         dst: item.dst,
         link: `https://traveltriangle.com/blog/places-to-visit-in-${item.dst.toLowerCase()}/`,
@@ -323,18 +342,18 @@ function fetchTravelTriangleData(linksToFetch) {
   let htmlContents = [];
   let processedLinks = 0;
 
-  linksToFetch.forEach(linkInfo => {
+  linksToFetch.forEach((linkInfo) => {
     fetch(linkInfo.link)
-      .then(response => response.text())
-      .then(html => {
+      .then((response) => response.text())
+      .then((html) => {
         htmlContents.push({ url: linkInfo.link, html });
         processedLinks++;
         if (processedLinks === linksToFetch.length) {
           handleHtmlContents(htmlContents);
         }
       })
-      .catch(error => {
-        console.log('Error fetching the URL:', error);
+      .catch((error) => {
+        console.log("Error fetching the URL:", error);
         processedLinks++;
         if (processedLinks === linksToFetch.length) {
           handleHtmlContents(htmlContents);
@@ -343,51 +362,58 @@ function fetchTravelTriangleData(linksToFetch) {
   });
 }
 
-
 function handleHtmlContents(contents) {
   // Create loading overlay elements
-  const loadingOverlay = document.createElement('div');
-  loadingOverlay.className = 'loading-overlay';
+  const loadingOverlay = document.createElement("div");
+  loadingOverlay.className = "loading-overlay";
 
-  const loadingMessage = document.createElement('div');
-  loadingMessage.className = 'loading-message';
+  const loadingMessage = document.createElement("div");
+  loadingMessage.className = "loading-message";
 
-  const loadingGif = document.createElement('img');
-  console.log('Current Path:', window.location.pathname);
-  loadingGif.src = 'assets/loading.gif';
-  loadingGif.alt = 'Loading...';
-  loadingGif.className = 'loading-gif';
+  const loadingGif = document.createElement("img");
+  console.log("Current Path:", window.location.pathname);
+  loadingGif.src = "assets/loading.gif";
+  loadingGif.alt = "Loading...";
+  loadingGif.className = "loading-gif";
 
   // Append loading elements to the overlay
   loadingOverlay.appendChild(loadingGif);
 
   // Append loading overlay to the body
   document.body.appendChild(loadingOverlay);
-  document.body.style.pointerEvents = 'none';
+  document.body.style.pointerEvents = "none";
 
-  let content = '';
+  let content = "";
   let isFirstParagraph = true;
 
-  contents.forEach(item => {
+  contents.forEach((item) => {
     const parser = new DOMParser();
-    const doc = parser.parseFromString(item.html, 'text/html');
+    const doc = parser.parseFromString(item.html, "text/html");
 
-    doc.querySelectorAll('script, [onclick], [onmouseover], [onmouseout], [onkeydown], [onkeyup], [onkeypress], [onload], [onunload], [onresize], [onscroll], [onblur], [onfocus], [onerror]').forEach(el => el.remove());
-    doc.querySelectorAll('style').forEach(el => el.remove());
+    doc
+      .querySelectorAll(
+        "script, [onclick], [onmouseover], [onmouseout], [onkeydown], [onkeyup], [onkeypress], [onload], [onunload], [onresize], [onscroll], [onblur], [onfocus], [onerror]"
+      )
+      .forEach((el) => el.remove());
+    doc.querySelectorAll("style").forEach((el) => el.remove());
 
-    let title = doc.querySelector('title')?.innerText.trim() || 'No title';
-    let description = doc.querySelector('meta[name="description"]')?.getAttribute('content').trim() || 'No description';
+    let title = doc.querySelector("title")?.innerText.trim() || "No title";
+    let description =
+      doc
+        .querySelector('meta[name="description"]')
+        ?.getAttribute("content")
+        .trim() || "No description";
     let mainContent = extractMainContent(doc).trim();
     let attractions = extractAttractions(doc).trim();
 
     let displayContent = `URL: ${item.url}\nTitle: ${title}\nDescription: ${description}\nMain Content: ${mainContent}\nAttractions: ${attractions}`;
 
-    displayContent = displayContent.replace(/\n{2,}/g, '\n\n');
-    displayContent = displayContent.replace(/^\s+|\s+$/g, '');
-    displayContent = displayContent.replace(/\n\s+\n/g, '\n\n');
+    displayContent = displayContent.replace(/\n{2,}/g, "\n\n");
+    displayContent = displayContent.replace(/^\s+|\s+$/g, "");
+    displayContent = displayContent.replace(/\n\s+\n/g, "\n\n");
 
     if (!isFirstParagraph) {
-      content += '\n';
+      content += "\n";
     } else {
       isFirstParagraph = false;
     }
@@ -400,21 +426,21 @@ function handleHtmlContents(contents) {
     day: days,
     historical: history_value,
     amusement: amusement_value,
-    natural: natural_value
+    natural: natural_value,
   };
   console.log(days);
   const { processItinerary } = backend(data);
   processItinerary()
-    .then(response => {
+    .then((response) => {
       document.body.removeChild(loadingOverlay);
-      document.body.style.pointerEvents = 'auto'; // Make everything clickable again
+      document.body.style.pointerEvents = "auto"; // Make everything clickable again
       console.log(response);
 
       displayCards(response);
     })
-    .catch(error => {
+    .catch((error) => {
       document.body.removeChild(loadingOverlay);
-      document.body.style.pointerEvents = 'auto'; // Make everything clickable again
+      document.body.style.pointerEvents = "auto"; // Make everything clickable again
       // displayCards({
       //     'Day 1: India Gate, Lotus Temple': [
       //       'Morning: Start your day at India Gate (9:00 am - 10:30 am), which is located in the heart of New Delhi. Take some time to admire the monument and the eternal flame that burns nearby.',
@@ -441,33 +467,32 @@ function handleHtmlContents(contents) {
       //     ]
       //   }
       // );
-      console.error('Error processing the itinerary:', error);
-      const preElement = document.getElementById('main-content');
-      preElement.textContent = 'Error processing the itinerary';
+      console.error("Error processing the itinerary:", error);
+      const preElement = document.getElementById("main-content");
+      preElement.textContent = "Error processing the itinerary";
     });
 }
 
-
 function extractMainContent(doc) {
-  let mainElement = doc.querySelector('main') || doc.body;
-  return mainElement ? mainElement.innerText.trim() : 'No main content';
+  let mainElement = doc.querySelector("main") || doc.body;
+  return mainElement ? mainElement.innerText.trim() : "No main content";
 }
 
 function extractAttractions(doc) {
-  let attractionsList = '';
-  let attractionsSection = doc.querySelector('h2 ~ ul');
+  let attractionsList = "";
+  let attractionsSection = doc.querySelector("h2 ~ ul");
 
   if (attractionsSection) {
-    let attractions = attractionsSection.querySelectorAll('li');
+    let attractions = attractionsSection.querySelectorAll("li");
     if (attractions.length > 0) {
-      attractions.forEach(attraction => {
+      attractions.forEach((attraction) => {
         attractionsList += `
             Attraction: ${attraction.innerText.trim()}
           `;
       });
     }
   } else {
-    attractionsList = 'No attractions found';
+    attractionsList = "No attractions found";
   }
 
   return attractionsList;
@@ -477,44 +502,45 @@ let storedResponse = null;
 
 function displayCards(response) {
   storedResponse = response; // Store the response data
-  document.getElementById('main-content').style.display = 'block';
-  const preElement = document.getElementById('main-content');
-  preElement.textContent = '';
+  document.getElementById("main-content").style.display = "block";
+  const preElement = document.getElementById("main-content");
+  preElement.textContent = "";
 
-  const cardsContainer = document.createElement('div');
-  cardsContainer.className = 'cards-container';
+  const cardsContainer = document.createElement("div");
+  cardsContainer.className = "cards-container";
 
   for (const [day, activities] of Object.entries(response)) {
-    const card = document.createElement('div');
-    card.className = 'card';
+    const card = document.createElement("div");
+    card.className = "card";
 
     // Create and append card header
-    const cardHeader = document.createElement('div');
-    cardHeader.className = 'card-header';
+    const cardHeader = document.createElement("div");
+    cardHeader.className = "card-header";
     cardHeader.textContent = day;
     card.appendChild(cardHeader);
 
     // Create and append card body
-    const cardBody = document.createElement('div');
-    cardBody.className = 'card-body';
+    const cardBody = document.createElement("div");
+    cardBody.className = "card-body";
 
     activities.forEach((activity, index) => {
-      if (activity.trim() !== '') { // Check if activity is not an empty string
-        const activityElement = document.createElement('div');
-        activityElement.className = 'card-activity';
+      if (activity.trim() !== "") {
+        // Check if activity is not an empty string
+        const activityElement = document.createElement("div");
+        activityElement.className = "card-activity";
 
         // Add activity description
-        const description = document.createElement('p');
-        description.className = 'card-item';
+        const description = document.createElement("p");
+        description.className = "card-item";
         description.textContent = activity;
         activityElement.appendChild(description);
 
         // Optionally add a divider between activities, unless it's a "Leisure day"
-        if (day !== 'Leisure day' && index < activities.length - 1) {
+        if (day !== "Leisure day" && index < activities.length - 1) {
           // Check if the next activity is not an empty string before adding a divider
-          if (activities[index + 1].trim() !== '') {
-            const divider = document.createElement('hr');
-            divider.className = 'activity-divider';
+          if (activities[index + 1].trim() !== "") {
+            const divider = document.createElement("hr");
+            divider.className = "activity-divider";
             activityElement.appendChild(divider);
           }
         }
@@ -530,19 +556,17 @@ function displayCards(response) {
   preElement.appendChild(cardsContainer);
 
   // Show the download button after cards are displayed
-  document.getElementById('downloadButton').style.display = 'block';
+  document.getElementById("downloadButton").style.display = "block";
 }
 
-
-
 function formatResponseAsText(response) {
-  let formattedText = '';
+  let formattedText = "";
   for (const [day, activities] of Object.entries(response)) {
     formattedText += `${day}\n`;
-    activities.forEach(activity => {
+    activities.forEach((activity) => {
       formattedText += `  - ${activity}\n`;
     });
-    formattedText += '\n';
+    formattedText += "\n";
   }
   return formattedText;
 }
@@ -550,8 +574,9 @@ function formatResponseAsText(response) {
 // Function to handle data download
 function downloadData(response) {
   const formattedText = formatResponseAsText(response);
-  const dataStr = "data:text/plain;charset=utf-8," + encodeURIComponent(formattedText);
-  const downloadAnchorNode = document.createElement('a');
+  const dataStr =
+    "data:text/plain;charset=utf-8," + encodeURIComponent(formattedText);
+  const downloadAnchorNode = document.createElement("a");
   downloadAnchorNode.setAttribute("href", dataStr);
   downloadAnchorNode.setAttribute("download", "itinerary.txt");
   document.body.appendChild(downloadAnchorNode);
@@ -560,10 +585,10 @@ function downloadData(response) {
 }
 
 // Event listener for the download button
-document.getElementById('downloadButton').addEventListener('click', () => {
+document.getElementById("downloadButton").addEventListener("click", () => {
   if (storedResponse) {
     downloadData(storedResponse); // Use the stored response data
   } else {
-    alert('No data available to download.');
+    alert("No data available to download.");
   }
 });

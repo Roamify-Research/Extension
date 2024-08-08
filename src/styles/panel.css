@@ -7,7 +7,9 @@ body {
   height: 100vh;
   background-color: #515151;
 }
-.splash-container, .main-container, .login-container {
+.splash-container,
+.main-container,
+.login-container {
   position: absolute;
   width: 100%;
   height: 100%;
@@ -36,7 +38,7 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background-color: #251F48;
+  background-color: #251f48;
   color: white;
   font-size: 1.5em;
   position: absolute;
@@ -58,18 +60,20 @@ body {
   border: 2px solid white;
   border-radius: 15px;
   background: rgba(255, 255, 255, 0.1);
-  position: relative; 
-  top: -20%; 
+  position: relative;
+  top: -20%;
 }
 .empty-frame h2 {
   margin-top: 0;
   font-size: 2em;
 }
-.login-form, .signup-form {
+.login-form,
+.signup-form {
   display: flex;
   flex-direction: column;
 }
-.login-form input, .signup-form input {
+.login-form input,
+.signup-form input {
   margin-bottom: 15px;
   padding: 10px;
   border: 1px solid #ddd;
@@ -78,7 +82,8 @@ body {
   color: #000;
   font-size: 1em;
 }
-.login-form button, .signup-form button {
+.login-form button,
+.signup-form button {
   padding: 10px;
   border: none;
   border-radius: 5px;
@@ -88,7 +93,8 @@ body {
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
-.login-form button:hover, .signup-form button:hover {
+.login-form button:hover,
+.signup-form button:hover {
   background-color: #5754e7;
 }
 img {
