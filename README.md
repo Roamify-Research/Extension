@@ -17,9 +17,6 @@ Welcome to the official repository of Roamify Chrome Extension. This repository 
 - [Introduction](#introduction)
 - [Directory Structure](#directory-structure)
 - [Extension Objectives](#extension-objectives)
-- [Methodology](#methodology)
-  - [Data Collection & Preprocessing](#data-collection--preprocessing)
-  <!-- @Noel @Muthuraj, write more -->
 - [Citing This Work](#citing-this-work)
 - [Acknowledgements](#acknowledgements)
 
@@ -81,21 +78,13 @@ Extension/
 └── requirements.txt
 ```
 
+
 ## Extension Objectives
 
-<!-- @Noel @Muthuraj, write more -->
+1. **User-Friendly and Minimal Design**: Ensure the extension is easy to use for individuals of all age groups by maintaining a clean and intuitive interface.
+2. **Simplified Itinerary Creation**: Provide features that make it easier for users to create and manage travel itineraries with minimal effort.
+3. **Real-Time Data Scraping**: Enable the extension to directly scrape data from the current Google tab to generate detailed and relevant itineraries.
 
-<!-- - **Personalized Recommendations**: Enhance user travel experiences by providing customized travel recommendations based on user preferences and behavior.
-- **Advanced NLP**: Utilize state-of-the-art NLP techniques to parse and understand user inputs accurately.
-- **Efficient LLMs**: Implement and fine-tune large language models to generate high-quality and relevant travel content. -->
-
-## Methodology
-
-### Data Collection & Preprocessing
-
-<!-- @Noel @Muthuraj, write more -->
-
-<!-- Our data collection process involves scraping travel-related information from various sources and preprocessing this data to ensure its quality and relevance. We use sophisticated cleaning techniques to remove noise and enhance data integrity. -->
 
 ## Citing This Work
 
