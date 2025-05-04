@@ -12,6 +12,8 @@
 
 Welcome to the official repository of Roamify Chrome Extension. This repository contains the code and documentation for our innovative approach to providing personalized travel recommendations using a chrome extension.
 
+[Wiki](https://deepwiki.com/Roamify-Research/Extension)
+
 ## Table of Contents
 
 - [Introduction](#introduction)
