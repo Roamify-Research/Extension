@@ -97,6 +97,28 @@ document.addEventListener("DOMContentLoaded", function () {
   // Call populateDestinations to load the destinations from the airport codes
   populateDestinations();
 
+  // Auto-detect destination from active tab URL
+  async function autoDetectDestination() {
+    try {
+      const tab = await getActiveTab();
+      if (tab && tab.url) {
+        console.log("Auto-detecting from URL:", tab.url);
+        const details = await extractFlightDetails(tab.url);
+        if (details && details.dst) {
+          console.log("Detected destination:", details.dst);
+          destinationInput.value = details.dst;
+          // Trigger input event to update any related UI (like suggestions closure)
+          destinationInput.dispatchEvent(new Event('input'));
+        }
+      }
+    } catch (err) {
+      console.error("Auto-detection failed:", err);
+    }
+  }
+
+  // Run auto-detection
+  autoDetectDestination();
+
   // Handle auto-complete
   destinationInput.addEventListener("input", function () {
     const inputValue = this.value.toLowerCase();
