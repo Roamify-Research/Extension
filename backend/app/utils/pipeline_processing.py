@@ -99,31 +99,41 @@ class Pipeline:
     def t5_ollama_processing(self, document, days, historical, amusement, natural, destination=None, url=None, urls=None):
         # If document (text) is not provided, try to fetch it using Firecrawl
         if not document or len(document.strip()) < 50:
+            # Consolidate text from multiple sources
             gathered_text = ""
             
-            # Handle list of URLs (Multi-tab support)
+            # 1. Scrape all provided URLs (Multi-tab support)
             if urls and isinstance(urls, list):
                 print(f"Scraping multiple tabs: {len(urls)} URLs")
                 for u in urls:
+                    # Basic check to avoid scraping search result pages or the extension itself if possible
+                    if "google.com/search" in u or "itinerary.html" in u:
+                        continue
+                        
                     content = self.firecrawl_processor.scrape_url(u)
                     if content:
                         gathered_text += f"\n\n--- Source: {u} ---\n\n" + content
             
-            # Handle single URL
-            elif url:
-                gathered_text = self.firecrawl_processor.scrape_url(url)
+            # 2. If single URL is provided and not already scraped
+            if url and url not in (urls or []):
+                content = self.firecrawl_processor.scrape_url(url)
+                if content:
+                    gathered_text += f"\n\n--- Source: {url} ---\n\n" + content
             
-            # Handle destination search
-            elif destination:
-                gathered_text = self.firecrawl_processor.search_travel_info(destination)
+            # 3. If destination is provided, search and add more context
+            if destination:
+                print(f"Searching additional info for destination: {destination}")
+                search_content = self.firecrawl_processor.search_travel_info(destination)
+                if search_content:
+                    gathered_text += f"\n\n--- Search Results for {destination} ---\n\n" + search_content
             
             document = gathered_text
-            print(f"DEBUG: Gathered document length from Firecrawl: {len(document) if document else 0}")
+            print(f"DEBUG: Consolidated document length: {len(document) if document else 0}")
             if document:
                 print(f"DEBUG: Document preview (first 200 chars): {document[:200]!r}")
             
             if not document:
-                print("Warning: Could not fetch document via Firecrawl. Proceeding with empty text.")
+                print("Warning: No context gathered from tabs or search. Proceeding with empty text.")
                 document = ""
 
         count = 1

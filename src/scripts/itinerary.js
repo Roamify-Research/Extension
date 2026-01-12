@@ -254,32 +254,24 @@ document.addEventListener("DOMContentLoaded", function () {
     console.log("  Amusement:", amusement_value);
     console.log("  Natural:", natural_value);
 
-    if (destination) {
+    // Unified logic: Always collect URLs from all tabs, and send both destination + urls
+    chrome.tabs.query({}, async (tabs) => {
+      const urls = tabs
+        .map(tab => tab.url)
+        .filter(url => url && url.startsWith("http")); // Only collect web URLs
+
       const data = {
         destination: destination,
+        urls: urls,
         day: days,
         historical: history_value,
         amusement: amusement_value,
         natural: natural_value
       };
-      sendToBackend(data);
-    } else {
-      // Collect URLs from ALL open tabs
-      chrome.tabs.query({}, async (tabs) => {
-        const urls = tabs
-          .map(tab => tab.url)
-          .filter(url => url.startsWith("http")); // Only send web URLs
 
-        const data = {
-          urls: urls,
-          day: days,
-          historical: history_value,
-          amusement: amusement_value,
-          natural: natural_value
-        };
-        sendToBackend(data);
-      });
-    }
+      console.log("Submitting unified data:", data);
+      sendToBackend(data);
+    });
   });
 });
 
