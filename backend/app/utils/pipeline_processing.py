@@ -118,6 +118,9 @@ class Pipeline:
                 gathered_text = self.firecrawl_processor.search_travel_info(destination)
             
             document = gathered_text
+            print(f"DEBUG: Gathered document length from Firecrawl: {len(document) if document else 0}")
+            if document:
+                print(f"DEBUG: Document preview (first 200 chars): {document[:200]!r}")
             
             if not document:
                 print("Warning: Could not fetch document via Firecrawl. Proceeding with empty text.")
@@ -125,6 +128,7 @@ class Pipeline:
 
         count = 1
         processed_document = self.nlp_processor.process_web_text(document)
+        print(f"DEBUG: Number of attractions extracted: {len(processed_document)}")
         for key, text in processed_document.items():
             result = self.t5_processor.predict(text)
             print(f"Attraction {count}: {key}\n\n")
@@ -135,7 +139,7 @@ class Pipeline:
             processed_document[key] = result
 
         itenary_text = self.ollama_processor.ollama_attraction(
-            processed_document, days, historical, amusement, natural
+            processed_document, days, historical, amusement, natural, destination=destination
         )
         return self.nlp_processor.parse_itinerary(itenary_text)
 

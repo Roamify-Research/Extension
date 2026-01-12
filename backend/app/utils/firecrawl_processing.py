@@ -26,11 +26,32 @@ class FirecrawlProcessor:
         try:
             logger.info(f"Scraping URL with Firecrawl: {url}")
             result = self.app.scrape(url, formats=['markdown'])
-            # In v4+, the result is a Document object with a .markdown attribute
-            if hasattr(result, 'markdown'):
-                return result.markdown
-            # Fallback for dict-like results or other versions
-            return result.get('markdown') if isinstance(result, dict) else None
+            
+            # Debugging: Log the type and structure of the result
+            logger.info(f"Firecrawl result type: {type(result)}")
+            
+            # In v1 (latest sdk usually), result is a dict with 'markdown' key
+            if isinstance(result, dict):
+                content = result.get('markdown')
+                if content:
+                    logger.info(f"Successfully scraped {len(content)} characters.")
+                    return content
+                else:
+                    logger.warning(f"Firecrawl dict result missing 'markdown' key or empty. Keys: {result.keys()}")
+            
+            # In some SDK versions, it might be a Document object
+            elif hasattr(result, 'markdown'):
+                content = getattr(result, 'markdown')
+                if content:
+                    logger.info(f"Successfully scraped {len(content)} characters (object).")
+                    return content
+                else:
+                    logger.warning("Firecrawl object result has empty 'markdown' attribute.")
+            
+            else:
+                logger.error(f"Unexpected Firecrawl result format: {result}")
+            
+            return None
         except Exception as e:
             logger.error(f"Error scraping URL {url}: {e}")
             return None

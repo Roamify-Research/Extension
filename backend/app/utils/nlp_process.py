@@ -17,23 +17,45 @@ class NLPProcessor:
     """Processes text to extract and clean tourist attraction data."""
 
     def __init__(self, spacy_model: str = "en_core_web_lg"):
-        # Download necessary NLTK data
-        try:
-            nltk.data.find("corpora/stopwords")
-            nltk.data.find("tokenizers/punkt")
-        except LookupError:
-            logger.info("Downloading NLTK resources...")
-            nltk.download("stopwords", quiet=True)
-            nltk.download("punkt", quiet=True)
+        # Explicitly check for NLTK resources to avoid silent hangs
+        required_resources = [
+            ("corpora/stopwords", "stopwords"),
+            ("tokenizers/punkt", "punkt"),
+            ("tokenizers/punkt_tab", "punkt_tab")
+        ]
+        
+        for resource_path, download_name in required_resources:
+            try:
+                # Check if NLTK can find the resource
+                nltk.data.find(resource_path)
+            except (LookupError, OSError):
+                # If not found, check if it's already working (sometimes detection fails but usage works)
+                try:
+                    if download_name == "stopwords":
+                        from nltk.corpus import stopwords as _
+                    elif "punkt" in download_name:
+                        from nltk.tokenize import word_tokenize as _
+                    logger.info(f"Resource {download_name} is already available via environment.")
+                    continue
+                except (ImportError, LookupError):
+                    logger.info(f"Resource {download_name} not found. Attempting download...")
+                    try:
+                        nltk.download(download_name)
+                    except Exception as e:
+                        logger.error(f"Failed to download {download_name}: {e}")
+                        logger.info("Proceeding anyway; the app might still work if paths are set manually.")
 
+        logger.info("NLP resources initialization complete.")
         self.stop_words = set(stopwords.words("english"))
 
-        # Load SpaCy model once
-        logger.info(f"Loading SpaCy model: {spacy_model}")
+        # Load SpaCy model
+        logger.info(f"Loading SpaCy model '{spacy_model}' (this can take 15-30 seconds)...")
         try:
             self.nlp = spacy.load(spacy_model)
+            logger.info("SpaCy model loaded successfully.")
         except OSError:
-            logger.error(f"SpaCy model {spacy_model} not found. Please install it.")
+            logger.error(f"SpaCy model {spacy_model} not found.")
+            logger.info(f"TIP: Run 'python -m spacy download {spacy_model}' manually.")
             raise
 
     def process_web_text(self, text: str) -> Dict[str, str]:
