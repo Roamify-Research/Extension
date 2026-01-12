@@ -1,7 +1,7 @@
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === "fetchTravelData") {
     console.log("Background script: Fetching URL:", message.url);
-    
+
     fetch(message.url)
       .then(response => {
         console.log("Background script: Got response, status:", response.status);
@@ -15,7 +15,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         console.error("Background script: Error fetching:", err);
         sendResponse({ success: false, error: err.toString() });
       });
-    
+
     return true; // keeps the message channel open for async response
   }
 });
+
+// Enable Side Panel to open on action click
+chrome.sidePanel
+  .setPanelBehavior({ openPanelOnActionClick: true })
+  .catch((error) => console.error(error));
