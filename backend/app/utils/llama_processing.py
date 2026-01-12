@@ -1,8 +1,11 @@
+import logging
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer, TextStreamer, pipeline
 
+logger = logging.getLogger(__name__)
+
 # Define the prompt template
-alpaca_prompt = """Below is an instruction that describes a task, paired with an input that provides further context. Write a response that appropriately completes the request.
+ALPACA_PROMPT = """Below is an instruction that describes a task, paired with an input that provides further context. Write a response that appropriately completes the request.
 
 ### Instruction:
 {}
@@ -15,87 +18,94 @@ alpaca_prompt = """Below is an instruction that describes a task, paired with an
 
 
 class LlamaProcessing:
-    def __init__(self, model_path):
-        self.model_path = model_path
-        self.tokenizer = AutoTokenizer.from_pretrained(model_path)
-        self.model = AutoModelForCausalLM.from_pretrained(
-            model_path, device_map="cuda:0"
-        )
-        self.generator = pipeline(
-            "text-generation", model=self.model, tokenizer=self.tokenizer
-        )
+    """Handles text generation and summarization using Llama-based models."""
 
-    def predict_summary(self, text):
-        prompt = alpaca_prompt.format(
-            "Summarize the following Input briefly in about 2-3 lines starting with the name of the attraction.",  # instruction
-            text,  # input
-            "",  # output - leave this blank for generation!
+    def __init__(self, model_path: str):
+        self.model_path = model_path
+        logger.info(f"Initializing Llama model: {model_path}")
+        
+        try:
+            self.tokenizer = AutoTokenizer.from_pretrained(model_path)
+            
+            # Determine best available device (auto will handle MPS on Mac)
+            device_map = "auto"
+            if torch.backends.mps.is_available():
+                # Explicitly use MPS if available for better performance on Mac M-series
+                logger.info("Using MPS device for Llama")
+            
+            self.model = AutoModelForCausalLM.from_pretrained(
+                model_path, 
+                device_map=device_map,
+                torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32
+            )
+            self.generator = pipeline(
+                "text-generation", 
+                model=self.model, 
+                tokenizer=self.tokenizer
+            )
+        except Exception as e:
+            logger.error(f"Failed to load Llama model from {model_path}: {e}")
+            logger.warning("Llama functionality will be disabled.")
+            self.model = None
+            self.tokenizer = None
+
+    def predict_summary(self, text: str) -> str:
+        """Summarizes text using the Alpaca prompt format."""
+        if not self.model or not self.tokenizer:
+            return "Llama model not initialized."
+
+        prompt = ALPACA_PROMPT.format(
+            "Summarize the following Input briefly in about 2-3 lines starting with the name of the attraction.",
+            text,
+            "",
         )
         inputs = self.tokenizer(prompt, return_tensors="pt").to(self.model.device)
 
-        # Adjust the parameters
-        result = self.model.generate(
-            **inputs,
-            max_new_tokens=256,  # Experiment with different values
-            repetition_penalty=2.0,  # Ensure repetition_penalty is set here
-            streamer=TextStreamer(self.tokenizer),
-        )
+        with torch.no_grad():
+            result = self.model.generate(
+                **inputs,
+                max_new_tokens=256,
+                repetition_penalty=1.2,  # Lowered from 2.0 to avoid weirdness
+                streamer=TextStreamer(self.tokenizer),
+            )
 
         return self.tokenizer.decode(result[0], skip_special_tokens=True)
 
-    def update_summary(self, text):
-        prompt = alpaca_prompt.format(
-            "Given the following text which includes key information about a tourist attraction, generate a concise summary in 100 words",  # Update with your specific instruction
-            text,  # Input text to summarize
-            "",  # Output placeholder, leave blank for generation
+    def update_summary(self, text: str) -> str:
+        """Generates a concise summary based on provided key information."""
+        if not self.model:
+            return "Llama model not initialized."
+
+        prompt = ALPACA_PROMPT.format(
+            "Given the following text which includes key information about a tourist attraction, generate a concise summary in 100 words",
+            text,
+            "",
         )
 
-        # Tokenize the prompt
-        inputs = self.tokenizer(prompt, return_tensors="pt")
-
-        # Generate text based on the prompt
         generated_texts = self.generator(
             prompt,
-            max_length=256,
+            max_new_tokens=256,
             pad_token_id=self.tokenizer.eos_token_id,
             temperature=0.7,
             top_p=0.9,
-            top_k=50,
-            num_beams=5,
+            num_beams=3,
             no_repeat_ngram_size=2,
             early_stopping=True,
         )
-        generated_text = generated_texts[0]["generated_text"]
-        print(generated_text)
-        return generated_text
+        return generated_texts[0]["generated_text"]
 
-    def generate_itinerary(self):
-        prompt = {
-            "role": "Traveler",
-            "location": "Paris",
-            "duration": "3 days",
-            "interest": "Art, History, Culture",
-            "budget": "$500",
-            "accommodation": "Hotel",
-            "transport": "Public transport",
-            "food": "Local cuisine",
-            "attractions": [
-                "Eiffel Tower",
-                "Louvre Museum",
-                "Notre Dame Cathedral",
-                "Champs-Elysees",
-                "Montmartre",
-                "Seine River Cruise",
-            ],
-        }
+    def generate_itinerary(self, location: str, attractions: list, duration: str = "3 days") -> str:
+        """Generates a travel itinerary."""
+        if not self.model:
+            return "Llama model not initialized."
 
-        # Create a prompt for the LLaMA model
-        input_prompt = f"Generate a detailed itinerary for a 3-day trip to Paris, including transportation, accommodation, and activities. The traveler is interested in Art, History, and Culture, and wants to visit the Eiffel Tower, Louvre Museum, Notre Dame Cathedral, Champs-Elysees, Montmartre, and Seine River Cruise. The budget is $500."
-        # Generate the itinerary using the LLaMA model
+        input_prompt = f"Generate a detailed itinerary for a {duration} trip to {location}, including the following attractions: {', '.join(attractions)}."
+        
         inputs = self.tokenizer(input_prompt, return_tensors="pt").to(self.model.device)
-        result = self.model.generate(
-            **inputs, max_new_tokens=8192, repetition_penalty=2.0
-        )
-        itinerary = self.tokenizer.decode(result[0], skip_special_tokens=True)
-
-        return itinerary
+        with torch.no_grad():
+            result = self.model.generate(
+                **inputs, 
+                max_new_tokens=1024, 
+                repetition_penalty=1.2
+            )
+        return self.tokenizer.decode(result[0], skip_special_tokens=True)

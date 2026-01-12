@@ -1,110 +1,137 @@
+import json
+import logging
+import re
+from typing import Dict, List
+
 import nltk
 import spacy
-import json
-from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
-import re
+from nltk.tokenize import word_tokenize
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
-class NLP_Processor:
-    def __init__(self):
-        nltk.download("stopwords")
-        nltk.download("punkt")
-        self.stopwords = set(stopwords.words("english"))
+class NLPProcessor:
+    """Processes text to extract and clean tourist attraction data."""
 
-    def NLP_Processing(self, webscraped_text):
-        self.text = webscraped_text
-        spacy_processed_text = self.spacy_nlp()
-        attractions = self.sentence_processing(spacy_processed_text)
-        processed_data = self.word_tokenize(attractions)
-        return processed_data
+    def __init__(self, spacy_model: str = "en_core_web_lg"):
+        # Download necessary NLTK data
+        try:
+            nltk.data.find("corpora/stopwords")
+            nltk.data.find("tokenizers/punkt")
+        except LookupError:
+            logger.info("Downloading NLTK resources...")
+            nltk.download("stopwords", quiet=True)
+            nltk.download("punkt", quiet=True)
 
-    def spacy_nlp(self):
-        nlp = spacy.load("en_core_web_lg")
-        doc = nlp(self.text)
-        return doc
+        self.stop_words = set(stopwords.words("english"))
 
-    def sentence_processing(self, spacy_text):
-        sentences = [sent.text for sent in spacy_text.sents]
-        sentences_processed = []
+        # Load SpaCy model once
+        logger.info(f"Loading SpaCy model: {spacy_model}")
+        try:
+            self.nlp = spacy.load(spacy_model)
+        except OSError:
+            logger.error(f"SpaCy model {spacy_model} not found. Please install it.")
+            raise
+
+    def process_web_text(self, text: str) -> Dict[str, str]:
+        """
+        Main entry point for processing web-scraped text.
+        Returns a dictionary mapping attraction names to cleaned descriptions.
+        """
+        if not text:
+            return {}
+
+        doc = self.nlp(text)
+        attractions = self._extract_attractions(doc)
+        cleaned_data = self._clean_attractions(attractions)
+        return cleaned_data
+
+    def _extract_attractions(self, doc: spacy.tokens.Doc) -> Dict[int, str]:
+        """Segments sentences and identifies attraction blocks based on numbering."""
+        attractions = {}
         current_index = 0
-        attractions = {}
-        for sentence in sentences:
-            s = sentence.split("\n")
-            for i in s:
-                s_ = i.split(".")
-                sentences_processed.extend(s_)
 
-        for index in range(len(sentences_processed)):
-            sentence = sentences_processed[index].strip()
-            if sentence.isdigit():
-                val = int(sentences_processed[index])
+        # Pattern to detect leading numbers like "1.", "1)", or just "1" at start of line
+        number_pattern = re.compile(r"^(\d+)[\.\)]?\s*")
+
+        for sent in doc.sents:
+            sentence_text = sent.text.strip()
+            if not sentence_text:
+                continue
+
+            match = number_pattern.match(sentence_text)
+            if match:
+                val = int(match.group(1))
+                # Check if it follows the sequence
                 if val == current_index + 1:
-                    current_index += 1
-                    attractions[current_index] = ""
+                    current_index = val
+                    # Remove the number prefix from the content
+                    content = number_pattern.sub("", sentence_text)
+                    attractions[current_index] = content + " "
+                    continue
 
-            else:
-                if current_index != 0:
-                    attractions[current_index] += sentence + " "
+            if current_index > 0:
+                attractions[current_index] += sentence_text + " "
+
         return attractions
 
-    def word_tokenize(self, attraction_data):
-        attractions = {}
-        for id, attraction in attraction_data.items():
-            words = word_tokenize(attraction)
-            name = ""
+    def _clean_attractions(self, attraction_data: Dict[int, str]) -> Dict[str, str]:
+        """Cleans attraction names and descriptions, removing noise words."""
+        cleaned_attractions = {}
+        noise_words = {"image", "credit", "source", "photo"}
 
-            for i in range(len(words)):
-                if words[i].lower() == "image":
+        for _, raw_text in attraction_data.items():
+            words = word_tokenize(raw_text)
+            if not words:
+                continue
+
+            # Extract name: usually the first few words until a specific marker or "image"
+            name_parts = []
+            description_start_idx = 0
+            for i, word in enumerate(words):
+                if word.lower() in noise_words or word in {":", "-"}:
+                    description_start_idx = i + 1
                     break
-                name += words[i] + " "
+                name_parts.append(word)
+                description_start_idx = i + 1
 
-            words = [
+            name = " ".join(name_parts).strip()
+
+            # Clean description
+            description_words = [
                 w
-                for w in words
-                if w.isalnum()
-                and w != ":"
-                and w != "-"
-                and w.lower() != "image"
-                and w.lower() != "credit"
-                and w.lower() != "source"
+                for w in words[description_start_idx:]
+                if w.isalnum() and w.lower() not in noise_words
             ]
-            attractions[name] = " ".join(words)
+            description = " ".join(description_words).strip()
 
-        return attractions
+            if name:
+                cleaned_attractions[name] = description
 
-    def itenary_processing(self, itenary):
-        matches = re.findall(
-            r"(\*\*Day [0-9]+:.*?\*\*)\n\n(.*?)(?=\n\n\*\*Day [0-9]+:|\Z)",
-            itenary,
-            re.DOTALL,
+        return cleaned_attractions
+
+    def parse_itinerary(self, itinerary_text: str) -> Dict[str, List[str]]:
+        """Parses a raw itinerary string into a structured dictionary by day."""
+        # Regex to find "**Day X: ...**" blocks
+        day_pattern = re.compile(
+            r"(\*\*Day \d+:.*?\*\*)\n\n(.*?)(?=\n\n\*\*Day \d+:|\Z)", re.DOTALL
         )
-        print(matches)
-        days_dict = {}
+        matches = day_pattern.findall(itinerary_text)
 
-        # Iterate over matches and store them in the dictionary
-        for match in matches:
-            day_heading = match[0].strip("*")  # Clean the day heading
-            content = match[1].strip()
-            days_dict[day_heading] = content
-        print(days_dict)
-        # Tokenize and clean the content for each day
-        itenary_dict = {}
-        for day, content in days_dict.items():
-            itenary_dict[day] = []
+        structured_itinerary = {}
+        for heading, content in matches:
+            day_key = heading.strip("*").strip()
+            
+            # Clean each line in the content
+            lines = []
             for line in content.split("\n"):
                 cleaned_line = line.strip().replace("*", "").strip()
                 if cleaned_line:
-                    itenary_dict[day].append(cleaned_line)
+                    lines.append(cleaned_line)
+            
+            structured_itinerary[day_key] = lines
 
-        print(itenary_dict)
-
-        return itenary_dict
-
-
-# data = open("scraped.txt","r").read()
-
-# nlp_processor = NLP_Processor()
-# processed_data = nlp_processor.NLP_Processing(data)
-# print("Keys: ", processed_data.keys())
-# print("Attractions: ", len(processed_data))
+        return structured_itinerary
