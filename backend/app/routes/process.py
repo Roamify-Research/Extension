@@ -22,23 +22,29 @@ def process_text():
         data = request.get_json()
         print(data)
 
-        if "text" not in data:
-            days = data["day"]
-            destination_name = ""
-            formatted_data = pipeline_processor.ollama_processing(
-                destination_name, days
+        days = data.get("day", 3)
+        destination = data.get("destination", "")
+        url = data.get("url", "")
+        urls = data.get("urls", []) # Support for multi-tab scraping
+        
+        # User preferences
+        historical = data.get("historical", 3)
+        amusement = data.get("amusement", 3)
+        natural = data.get("natural", 3)
+
+        if "text" not in data or not data["text"]:
+            # If text is not provided, use the modern Firecrawl + T5 flow
+            formatted_data = pipeline_processor.t5_ollama_processing(
+                None, days, historical, amusement, natural, 
+                destination=destination, url=url, urls=urls
             )
             return jsonify(formatted_data)
 
         text = data["text"]
-        days = data["day"]
-        # User preferences
-        historical = data["historical"]
-        amusement = data["amusement"]
-        natural = data["natural"]
-        # Process the text
+        # Process the provided text
         formatted_data = pipeline_processor.t5_ollama_processing(
-            text, days, historical, amusement, natural
+            text, days, historical, amusement, natural, 
+            destination=destination, url=url, urls=urls
         )
         return jsonify(formatted_data)
 

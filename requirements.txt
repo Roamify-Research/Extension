@@ -21,3 +21,4 @@ sentencepiece==0.2.0
 numpy
 pandas
 tqdm
+firecrawl-py

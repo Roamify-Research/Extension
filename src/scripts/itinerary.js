@@ -233,42 +233,30 @@ document.addEventListener("DOMContentLoaded", function () {
     console.log("  Natural:", natural_value);
 
     if (destination) {
-      const link = `https://traveltriangle.com/blog/places-to-visit-in-${destination.toLowerCase()}/`;
-      console.log("Fetching for destination:", destination, "Link:", link);
-      fetchTravelTriangleData([{ dst: destination, link }]);
+      const data = {
+        destination: destination,
+        day: days,
+        historical: history_value,
+        amusement: amusement_value,
+        natural: natural_value
+      };
+      sendToBackend(data);
     } else {
-      const activeTabUrl = await getActiveTabUrl();
-      if (activeTabUrl) {
-        if (activeTabUrl.includes("traveltriangle.com")) {
-          // If the current tab is a Travel Triangle tab, scrape it directly
-          chrome.scripting.executeScript(
-            {
-              target: { tabId: (await getActiveTab()).id },
-              func: getHtmlContent,
-            },
-            (results) => {
-              if (results && results[0]) {
-                handleHtmlContents([
-                  { url: activeTabUrl, html: results[0].result },
-                ]);
-              } else {
-                preElement.textContent =
-                  "Failed to retrieve content from the Travel Triangle tab.";
-              }
-            }
-          );
-        } else {
-          const flightDetails = await extractFlightDetails(activeTabUrl);
-          if (flightDetails && flightDetails.dst) {
-            const link = `https://traveltriangle.com/blog/places-to-visit-in-${flightDetails.dst.toLowerCase()}/`;
-            fetchTravelTriangleData([{ dst: flightDetails.dst, link }]);
-          } else {
-            processOpenTabs();
-          }
-        }
-      } else {
-        processOpenTabs();
-      }
+      // Collect URLs from ALL open tabs
+      chrome.tabs.query({}, async (tabs) => {
+        const urls = tabs
+          .map(tab => tab.url)
+          .filter(url => url.startsWith("http")); // Only send web URLs
+
+        const data = {
+          urls: urls,
+          day: days,
+          historical: history_value,
+          amusement: amusement_value,
+          natural: natural_value
+        };
+        sendToBackend(data);
+      });
     }
   });
 });
@@ -290,231 +278,32 @@ async function getActiveTabUrl() {
   return tab ? tab.url : null;
 }
 
-function processOpenTabs() {
-  chrome.tabs.query({}, (tabs) => {
-    let flightInfo = [];
-    let processedCount = 0;
-
-    tabs.forEach((tab) => {
-      chrome.scripting.executeScript(
-        {
-          target: { tabId: tab.id },
-          func: getHtmlContent,
-        },
-        (results) => {
-          processedCount++;
-          if (results && results[0]) {
-            extractFlightDetails(tab.url).then((flightDetails) => {
-              if (flightDetails) {
-                flightInfo.push({ url: tab.url, ...flightDetails });
-              }
-              if (processedCount === tabs.length) {
-                displayFlightInfo(flightInfo);
-              }
-            });
-          } else {
-            if (processedCount === tabs.length) {
-              displayFlightInfo(flightInfo);
-            }
-          }
-        }
-      );
-    });
-  });
-}
-
-function getHtmlContent() {
-  return document.documentElement.outerHTML;
-}
-
-function displayFlightInfo(info) {
-  const preElement = document.getElementById("main-content");
-  preElement.textContent = "";
-
-  if (info.length === 0) {
-    preElement.textContent =
-      "No flight booking websites found or no destinations detected.";
-  } else {
-    let linksToFetch = info.map((item) => {
-      return {
-        dst: item.dst,
-        link: `https://traveltriangle.com/blog/places-to-visit-in-${item.dst.toLowerCase()}/`,
-      };
-    });
-
-    fetchTravelTriangleData(linksToFetch);
-  }
-}
-
-function fetchTravelTriangleData(linksToFetch) {
-  // Create array of promises for all fetch requests
-  const fetchPromises = linksToFetch.map((linkInfo) => {
-    return new Promise((resolve, reject) => {
-      chrome.runtime.sendMessage(
-        { action: "fetchTravelData", url: linkInfo.link },
-        (response) => {
-          if (chrome.runtime.lastError) {
-            console.error("Runtime error:", chrome.runtime.lastError);
-            reject(chrome.runtime.lastError);
-            return;
-          }
-
-          if (response && response.success) {
-            resolve({ url: linkInfo.link, html: response.html });
-          } else {
-            console.error("Error fetching:", response?.error);
-            reject(new Error(response?.error || "Unknown error"));
-          }
-        }
-      );
-    });
-  });
-
-  // Wait for all fetches to complete
-  Promise.allSettled(fetchPromises)
-    .then((results) => {
-      const htmlContents = results
-        .filter((result) => result.status === "fulfilled")
-        .map((result) => result.value);
-      
-      if (htmlContents.length === 0) {
-        console.error("No content was successfully fetched");
-        const preElement = document.getElementById("main-content");
-        if (preElement) {
-          preElement.textContent = "Failed to fetch travel information. Please try again.";
-        }
-        return;
-      }
-      
-      handleHtmlContents(htmlContents);
-    })
-    .catch((error) => {
-      console.error("Error in fetchTravelTriangleData:", error);
-      const preElement = document.getElementById("main-content");
-      if (preElement) {
-        preElement.textContent = "Error fetching travel information. Please try again.";
-      }
-    });
-}
-
-
-function handleHtmlContents(contents) {
-  // Create loading overlay elements
+async function sendToBackend(data) {
+  // Create loading overlay
   const loadingOverlay = document.createElement("div");
   loadingOverlay.className = "loading-overlay";
-
-  const loadingMessage = document.createElement("div");
-  loadingMessage.className = "loading-message";
-
   const loadingGif = document.createElement("img");
-  console.log("Current Path:", window.location.pathname);
   loadingGif.src = "assets/loading.gif";
-  loadingGif.alt = "Loading...";
   loadingGif.className = "loading-gif";
-
-  // Append loading elements to the overlay
   loadingOverlay.appendChild(loadingGif);
-
-  // Append loading overlay to the body
   document.body.appendChild(loadingOverlay);
   document.body.style.pointerEvents = "none";
 
-  let content = "";
-  let isFirstParagraph = true;
+  console.log("Sending data to backend for full processing:", data);
 
-  contents.forEach((item) => {
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(item.html, "text/html");
-
-    doc
-      .querySelectorAll(
-        "script, [onclick], [onmouseover], [onmouseout], [onkeydown], [onkeyup], [onkeypress], [onload], [onunload], [onresize], [onscroll], [onblur], [onfocus], [onerror]"
-      )
-      .forEach((el) => el.remove());
-    doc.querySelectorAll("style").forEach((el) => el.remove());
-
-    let title = doc.querySelector("title")?.innerText.trim() || "No title";
-    let description =
-      doc
-        .querySelector('meta[name="description"]')
-        ?.getAttribute("content")
-        .trim() || "No description";
-    let mainContent = extractMainContent(doc).trim();
-    let attractions = extractAttractions(doc).trim();
-
-    let displayContent = `URL: ${item.url}\nTitle: ${title}\nDescription: ${description}\nMain Content: ${mainContent}\nAttractions: ${attractions}`;
-
-    displayContent = displayContent.replace(/\n{2,}/g, "\n\n");
-    displayContent = displayContent.replace(/^\s+|\s+$/g, "");
-    displayContent = displayContent.replace(/\n\s+\n/g, "\n\n");
-
-    if (!isFirstParagraph) {
-      content += "\n";
-    } else {
-      isFirstParagraph = false;
-    }
-
-    content += displayContent;
-  });
-
-  const data = {
-    text: content,
-    day: days,
-    historical: history_value,
-    amusement: amusement_value,
-    natural: natural_value,
-  };
-  
-  console.log("Data being sent to backend:");
-  console.log("  Text length:", content.length);
-  console.log("  Text preview:", content.substring(0, 200));
-  console.log("  Days:", days);
-  console.log("  Historical:", history_value);
-  console.log("  Amusement:", amusement_value);
-  console.log("  Natural:", natural_value);
-  console.log("  Full data object:", data);
-  
   const { processItinerary } = backend(data);
   processItinerary()
     .then((response) => {
       document.body.removeChild(loadingOverlay);
-      document.body.style.pointerEvents = "auto"; // Make everything clickable again
-      console.log(response);
-
+      document.body.style.pointerEvents = "auto";
       displayCards(response);
     })
     .catch((error) => {
       document.body.removeChild(loadingOverlay);
-      document.body.style.pointerEvents = "auto"; // Make everything clickable again
-      // displayCards({
-      //     'Day 1: India Gate, Lotus Temple': [
-      //       'Morning: Start your day at India Gate (9:00 am - 10:30 am), which is located in the heart of New Delhi. Take some time to admire the monument and the eternal flame that burns nearby.',
-      //       "Afternoon: Head over to the Lotus Temple (11:00 am - 1:00 pm), a beautiful Bahá'í House of Worship. This temple is known for its stunning architecture and serene surroundings.",
-      //       'Evening: Take some time to relax at your hotel or explore the local market near the temple.'
-      //     ],
-      //     'Day 2: Akshardham Temple, Hauz Khas': [
-      //       'Morning: Visit the Akshardham Temple (9:00 am - 11:30 am), a magnificent Hindu temple that is dedicated to Lord Swaminarayan. Be sure to catch the evening light and sound show, which is absolutely breathtaking.',
-      //       'Afternoon: Head over to Hauz Khas (2:00 pm - 4:30 pm), a historic village that is known for its beautiful Mughal-era architecture and tranquil surroundings. Take some time to explore the complex and visit the mosque and reservoir.'
-      //     ],
-      //     'Day 3: Chandni Chowk, Lodhi Gardens': [
-      //       'Morning: Start your day at Chandni Chowk (9:00 am - 11:30 am), a bustling market that is known for its street food, local shops, and historic significance.',
-      //       'Afternoon: Visit the Lodhi Gardens (2:00 pm - 4:30 pm), a beautiful Mughal-era garden that is known for its intricate architecture and peaceful surroundings. Take some time to relax and enjoy the serene atmosphere.'
-      //     ],
-      //     "Day 4: Humayun's Tomb, Jama Masjid": [
-      //       "Morning: Visit Humayun's Tomb (9:00 am - 11:30 am), a beautiful Mughal-era mausoleum that is known for its stunning architecture.",
-      //       'Afternoon: Head over to the Jama Masjid (2:00 pm - 4:30 pm), the largest mosque in India, which is known for its peaceful and tranquil surroundings. Take some time to admire the intricate architecture of this historic monument.'
-      //     ],
-      //     'Day 5: Leisure day': [
-      //       'Take some time to relax at your hotel or explore the local market.',
-      //       'If you have any last-minute sightseeing plans, now is a good time to fit them in.',
-      //       '',
-      //       'This itinerary should give you a good balance of history, culture, and relaxation. Enjoy your trip!'
-      //     ]
-      //   }
-      // );
+      document.body.style.pointerEvents = "auto";
       console.error("Error processing the itinerary:", error);
       const preElement = document.getElementById("main-content");
-      preElement.textContent = "Error processing the itinerary";
+      preElement.textContent = "Error processing the itinerary. Please check if backend is running.";
     });
 }
 
