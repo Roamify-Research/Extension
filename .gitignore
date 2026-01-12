@@ -6,3 +6,4 @@ backend/.venv/
 backend/app/utils/.venv/
 backend/app/utils/llama_model/
 backend/app/utils/__pycache__/
+.venv/

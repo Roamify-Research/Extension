@@ -1,18 +1,21 @@
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.action === "fetchLinks") {
-    let fetchPromises = message.links.map((link) =>
-      fetch(link).then((response) => response.text())
-    );
-
-    Promise.all(fetchPromises)
-      .then((pagesHtml) => {
-        sendResponse({ status: "success", data: pagesHtml });
+  if (message.action === "fetchTravelData") {
+    console.log("Background script: Fetching URL:", message.url);
+    
+    fetch(message.url)
+      .then(response => {
+        console.log("Background script: Got response, status:", response.status);
+        return response.text();
       })
-      .catch((error) => {
-        console.error("Error fetching links:", error);
-        sendResponse({ status: "error", error: error });
+      .then(html => {
+        console.log("Background script: Got HTML, length:", html.length);
+        sendResponse({ success: true, html });
+      })
+      .catch(err => {
+        console.error("Background script: Error fetching:", err);
+        sendResponse({ success: false, error: err.toString() });
       });
-
-    return true; // Keep the messaging channel open for sendResponse
+    
+    return true; // keeps the message channel open for async response
   }
 });

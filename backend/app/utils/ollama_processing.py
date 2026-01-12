@@ -19,14 +19,17 @@ class ollama_processor:
             prompt += f"Description: {details}\n\n"
 
             count += 1
-        payload = {"model": "llama3.1", "prompt": prompt, "stream": False}
+
+        print(prompt)
+        payload = {"model": "llama3.2", "prompt": prompt, "stream": False}
         response = requests.post(self.url, headers=self.headers, json=payload)
+        print(response.json())
         print(response.json()["response"])
         return response.json()["response"]
 
     def ollama_processor(self, destination_name: str, days):
         prompt = f"Generate an detailed itinerary for me for a {days} day trip to {destination_name}:\n"
 
-        payload = {"model": "llama3.1", "prompt": prompt, "stream": False}
+        payload = {"model": "llama3.2", "prompt": prompt, "stream": False}
         response = requests.post(self.url, headers=self.headers, json=payload)
         return response.json()["response"]

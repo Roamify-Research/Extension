@@ -1,34 +1,27 @@
 {
-  "manifest_version": 3,
+  "manifest_version": 2,
   "name": "ROAMIFY",
   "description": "An extension to get HTML content of all open tabs and display a sidebar.",
   "version": "1.2.0",
   "background": {
-    "service_worker": "scripts/background.js"
+    "scripts": ["scripts/background.js"]
   },
-  "side_panel": {
-    "default_path": "panel.html"
-  },
-  "action": {
-    "default_title": "ROAMIFY"
+  "sidebar_action": {
+    "default_title": "ROAMIFY",
+    "default_panel": "panel.html"
   },
   "options_ui": {
     "page": "options.html",
     "open_in_tab": true
   },
   "offline_enabled": true,
-  "minimum_chrome_version": "114",
   "permissions": [
     "contextMenus",
     "storage",
-    "sidePanel",
     "tabs",
-    "scripting",
-    "activeTab"
-  ],
-  "host_permissions": [
-    "http://localhost:5000/*",
+    "activeTab",
     "https://traveltriangle.com/*",
-    "https://makemytrip.com/*"
+    "https://makemytrip.com/*",
+    "http://localhost:5000/*"
   ]
 }

@@ -79,7 +79,7 @@ class NLP_Processor:
             itenary,
             re.DOTALL,
         )
-
+        print(matches)
         days_dict = {}
 
         # Iterate over matches and store them in the dictionary
@@ -87,7 +87,7 @@ class NLP_Processor:
             day_heading = match[0].strip("*")  # Clean the day heading
             content = match[1].strip()
             days_dict[day_heading] = content
-
+        print(days_dict)
         # Tokenize and clean the content for each day
         itenary_dict = {}
         for day, content in days_dict.items():

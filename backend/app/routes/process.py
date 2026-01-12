@@ -20,6 +20,7 @@ def process_text():
 
     if request.method == "POST":
         data = request.get_json()
+        print(data)
 
         if "text" not in data:
             days = data["day"]

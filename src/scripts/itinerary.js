@@ -225,8 +225,16 @@ document.addEventListener("DOMContentLoaded", function () {
     const destination = destinationInput.value;
     days = day_slider.value;
 
+    console.log("Generate button clicked:");
+    console.log("  Destination:", destination);
+    console.log("  Days:", days);
+    console.log("  History:", history_value);
+    console.log("  Amusement:", amusement_value);
+    console.log("  Natural:", natural_value);
+
     if (destination) {
       const link = `https://traveltriangle.com/blog/places-to-visit-in-${destination.toLowerCase()}/`;
+      console.log("Fetching for destination:", destination, "Link:", link);
       fetchTravelTriangleData([{ dst: destination, link }]);
     } else {
       const activeTabUrl = await getActiveTabUrl();
@@ -339,28 +347,56 @@ function displayFlightInfo(info) {
 }
 
 function fetchTravelTriangleData(linksToFetch) {
-  let htmlContents = [];
-  let processedLinks = 0;
+  // Create array of promises for all fetch requests
+  const fetchPromises = linksToFetch.map((linkInfo) => {
+    return new Promise((resolve, reject) => {
+      chrome.runtime.sendMessage(
+        { action: "fetchTravelData", url: linkInfo.link },
+        (response) => {
+          if (chrome.runtime.lastError) {
+            console.error("Runtime error:", chrome.runtime.lastError);
+            reject(chrome.runtime.lastError);
+            return;
+          }
 
-  linksToFetch.forEach((linkInfo) => {
-    fetch(linkInfo.link)
-      .then((response) => response.text())
-      .then((html) => {
-        htmlContents.push({ url: linkInfo.link, html });
-        processedLinks++;
-        if (processedLinks === linksToFetch.length) {
-          handleHtmlContents(htmlContents);
+          if (response && response.success) {
+            resolve({ url: linkInfo.link, html: response.html });
+          } else {
+            console.error("Error fetching:", response?.error);
+            reject(new Error(response?.error || "Unknown error"));
+          }
         }
-      })
-      .catch((error) => {
-        console.log("Error fetching the URL:", error);
-        processedLinks++;
-        if (processedLinks === linksToFetch.length) {
-          handleHtmlContents(htmlContents);
-        }
-      });
+      );
+    });
   });
+
+  // Wait for all fetches to complete
+  Promise.allSettled(fetchPromises)
+    .then((results) => {
+      const htmlContents = results
+        .filter((result) => result.status === "fulfilled")
+        .map((result) => result.value);
+      
+      if (htmlContents.length === 0) {
+        console.error("No content was successfully fetched");
+        const preElement = document.getElementById("main-content");
+        if (preElement) {
+          preElement.textContent = "Failed to fetch travel information. Please try again.";
+        }
+        return;
+      }
+      
+      handleHtmlContents(htmlContents);
+    })
+    .catch((error) => {
+      console.error("Error in fetchTravelTriangleData:", error);
+      const preElement = document.getElementById("main-content");
+      if (preElement) {
+        preElement.textContent = "Error fetching travel information. Please try again.";
+      }
+    });
 }
+
 
 function handleHtmlContents(contents) {
   // Create loading overlay elements
@@ -428,7 +464,16 @@ function handleHtmlContents(contents) {
     amusement: amusement_value,
     natural: natural_value,
   };
-  console.log(days);
+  
+  console.log("Data being sent to backend:");
+  console.log("  Text length:", content.length);
+  console.log("  Text preview:", content.substring(0, 200));
+  console.log("  Days:", days);
+  console.log("  Historical:", history_value);
+  console.log("  Amusement:", amusement_value);
+  console.log("  Natural:", natural_value);
+  console.log("  Full data object:", data);
+  
   const { processItinerary } = backend(data);
   processItinerary()
     .then((response) => {
