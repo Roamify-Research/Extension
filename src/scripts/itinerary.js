@@ -1,5 +1,5 @@
 const backend = (data) => {
-  const API_URL = "http://192.168.3.177:5001/process";
+  const API_URL = "https://roamify.fakepickle.tech/process";
 
   const processItinerary = async () => {
     const response = await fetch(API_URL, {

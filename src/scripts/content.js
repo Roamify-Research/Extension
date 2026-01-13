@@ -3,7 +3,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     const searchQuery =
       "Visit the Eiffel Tower, then the Louvre, and finally the Notre Dame Cathedral.";
     console.log(searchQuery);
-    fetch("http://192.168.3.177:5001/itinerary", {
+    fetch("https://roamify.fakepickle.tech/itinerary", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
