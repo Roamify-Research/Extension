@@ -71,67 +71,119 @@ class NLPProcessor:
         cleaned_data = self._clean_attractions(attractions)
         return cleaned_data
 
-    def _extract_attractions(self, doc: spacy.tokens.Doc) -> Dict[int, str]:
-        """Segments sentences and identifies attraction blocks based on numbering."""
+    def _extract_attractions(self, doc: spacy.tokens.Doc) -> Dict[str, str]:
+        """
+        Extracts attractions by prioritizing Named Entities (LOC, FAC, ORG).
+        Prevents junk titles (ads, slogans) by ensuring a relevant entity exists.
+        """
         attractions = {}
-        current_index = 0
-
-        # Pattern to detect leading numbers like "1.", "1)", or just "1" at start of line
-        number_pattern = re.compile(r"^(\d+)[\.\)]?\s*")
-
+        current_name = None
+        
+        # Patterns
+        number_pattern = re.compile(r"^(\d+)[\.\)]?\s*(.*)")
+        header_pattern = re.compile(r"^#{1,3}\s+(.*)|^\*\*(.*)\*\*$")
+        source_pattern = re.compile(r"--- (Source|Search Results): .* ---")
+        
+        VALID_ENTITIES = {"FAC", "ORG", "LOC", "GPE", "WORK_OF_ART"} # Removed PERSON to avoid junk like names
+        
         for sent in doc.sents:
-            sentence_text = sent.text.strip()
-            if not sentence_text:
+            text = sent.text.strip()
+            if not text:
                 continue
 
-            match = number_pattern.match(sentence_text)
-            if match:
-                val = int(match.group(1))
-                # Check if it follows the sequence
-                if val == current_index + 1:
-                    current_index = val
-                    # Remove the number prefix from the content
-                    content = number_pattern.sub("", sentence_text)
-                    attractions[current_index] = content + " "
+            # 0. Reset on Source Marker
+            if source_pattern.search(text):
+                current_name = None
+                continue
+
+            potential_title = None
+
+            # 1. Check for Numbered List
+            num_match = number_pattern.match(text)
+            if num_match:
+                potential_title = num_match.group(2).strip()
+
+            # 2. Check for Headers
+            if not potential_title:
+                header_match = header_pattern.match(text)
+                if header_match:
+                    potential_title = (header_match.group(1) or header_match.group(2)).strip()
+            
+            # 3. Check for Short Prominent Lines (NER Candidate)
+            if not potential_title and len(text.split()) < 10 and text[0].isupper():
+                potential_title = text
+
+            # 4. Validate Title with NER
+            if potential_title:
+                # Filter URL slugs or fragmented links
+                if "http" in potential_title.lower() or "www." in potential_title.lower() or "source:" in potential_title.lower():
+                     logger.debug(f"Skipping URL/Link title: {potential_title}")
+                     continue
+
+                # Filter specific junk terms common on travel sites
+                is_junk = any(x in potential_title.lower() for x in [
+                    "book now", "package", "call", "click here", "read more", "tripadvisor", 
+                    "viator", "expedia", "tour", "guide", "faq", "question", "blog", 
+                    "newsletter", "subscribe", "contact us", "privacy policy"
+                ])
+                
+                if is_junk:
+                    logger.debug(f"Skipping junk term title: {potential_title}")
                     continue
 
-            if current_index > 0:
-                attractions[current_index] += sentence_text + " "
+                # Analyze sentence entities
+                relevant_entities = [ent.text for ent in sent.ents if ent.label_ in VALID_ENTITIES]
+                
+                if relevant_entities:
+                    # HEURISTIC: Use the first/most prominent entity as the Attraction Name
+                    entity_name = relevant_entities[0]
+                    
+                    # Extra check: Ensure entity isn't just a junk word
+                    if entity_name.lower() in ["tripadvisor", "viator", "google", "facebook", "twitter"]:
+                        continue
 
+                    current_name = entity_name
+                    
+                    if current_name not in attractions:
+                        attractions[current_name] = ""
+                    logger.debug(f"Extracted Entity-based attraction: {current_name}")
+                    continue
+                
+                # If it was a numbered list but NO entity, it might be junk
+                if num_match and not relevant_entities:
+                   logger.debug(f"Skipping junk numbered item: {potential_title}")
+                   continue
+
+            # 5. Append to Description
+            if current_name:
+                attractions[current_name] += text + " "
+        
+        logger.info(f"Extracted {len(attractions)} attractions using NER-first approach.")
         return attractions
 
-    def _clean_attractions(self, attraction_data: Dict[int, str]) -> Dict[str, str]:
-        """Cleans attraction names and descriptions, removing noise words."""
+    def _clean_attractions(self, attraction_data: Dict[str, str]) -> Dict[str, str]:
+        """Cleans descriptions."""
         cleaned_attractions = {}
-        noise_words = {"image", "credit", "source", "photo"}
-
-        for _, raw_text in attraction_data.items():
-            words = word_tokenize(raw_text)
-            if not words:
-                continue
-
-            # Extract name: usually the first few words until a specific marker or "image"
-            name_parts = []
-            description_start_idx = 0
-            for i, word in enumerate(words):
-                if word.lower() in noise_words or word in {":", "-"}:
-                    description_start_idx = i + 1
-                    break
-                name_parts.append(word)
-                description_start_idx = i + 1
-
-            name = " ".join(name_parts).strip()
-
-            # Clean description
-            description_words = [
-                w
-                for w in words[description_start_idx:]
-                if w.isalnum() and w.lower() not in noise_words
-            ]
-            description = " ".join(description_words).strip()
-
-            if name:
-                cleaned_attractions[name] = description
+        
+        for name, raw_desc in attraction_data.items():
+            # Name is already an entity, so just strip
+            clean_name = name.strip()
+            
+            # Clean Description
+            doc = self.nlp(raw_desc)
+            clean_desc_sentences = []
+            
+            for sent in doc.sents:
+                s_text = sent.text.strip()
+                # Filter noise lines
+                if any(nw in s_text.lower() for nw in ["image source", "photo credit", "read full review", "book now"]):
+                    continue
+                clean_desc_sentences.append(s_text)
+            
+            full_desc = " ".join(clean_desc_sentences).strip()
+            
+            if clean_name and full_desc:
+                cleaned_attractions[clean_name] = full_desc
 
         return cleaned_attractions
 
