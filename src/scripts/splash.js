@@ -7,6 +7,14 @@ window.onload = () => {
   const loginLink = document.getElementById("loginLink");
   const body = document.body;
 
+  // Check for existing token
+  chrome.storage.local.get(["authToken"], (result) => {
+    if (result.authToken) {
+      // If token exists, skip splash/login and go straight to app
+      window.location.href = "itinerary.html";
+    }
+  });
+
   setTimeout(() => {
     body.style.backgroundColor = "#251F48";
     mainContainer.style.display = "flex";
@@ -36,19 +44,5 @@ window.onload = () => {
     loginForm.style.display = "block";
   });
 
-  // Handle login form submission
-  loginForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-    redirectToNewPage();
-  });
-
-  // Handle sign-up form submission
-  signupForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-    redirectToNewPage();
-  });
-
-  function redirectToNewPage() {
-    window.location.href = "itinerary.html";
-  }
+  // Submit handlers are now in rules/auth.js
 };

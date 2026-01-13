@@ -22,3 +22,6 @@ numpy
 pandas
 tqdm
 firecrawl-py
+Flask-SQLAlchemy
+Flask-Bcrypt
+PyJWT

@@ -22,6 +22,37 @@ let amusement_value = 0;
 let natural_value = 0;
 
 document.addEventListener("DOMContentLoaded", function () {
+  // --- AUTH & LOGOUT LOGIC ---
+  chrome.storage.local.get(["authToken", "username", "name"], (result) => {
+    if (!result.authToken) {
+      window.location.href = "panel.html";
+      return;
+    }
+
+    const greetingText = document.querySelector(".greeting-text");
+    if (greetingText) {
+      const displayName = result.name || result.username || "Traveler";
+      const display = displayName.charAt(0).toUpperCase() + displayName.slice(1);
+      greetingText.textContent = `Welcome back, ${display}`;
+    }
+  });
+
+  // Logout Handler (Delegated since structure might vary)
+  // We attach to the container '.options' or directly to document
+  document.addEventListener("click", (e) => {
+    // Traverse up to find if a link was clicked
+    let target = e.target;
+    if (target.tagName === 'IMG') target = target.parentElement;
+
+    if (target.tagName === 'A' && target.textContent.includes('Logout')) {
+      e.preventDefault();
+      chrome.storage.local.remove(["authToken", "username", "name"], () => {
+        window.location.href = "panel.html";
+      });
+    }
+  });
+  // --- END AUTH LOGIC ---
+
   const accountButton = document.getElementById("accountButton");
   const accountDropdown = document.getElementById("accountDropdown");
   const destinationInput = document.getElementById("destinationInput");
