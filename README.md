@@ -2,13 +2,11 @@
 
 ## _Roaming Redefined: Changing the Way the World Travels_
 
-[![Python 3.6+](https://img.shields.io/badge/python-3.6+-blue.svg)](https://www.python.org/downloads/release/python-360/)
-[![PyTorch](https://img.shields.io/badge/pytorch-1.8.1-red.svg?logo=pytorch)](https://pytorch.org/)
-[![Django](https://img.shields.io/badge/Django-5.0.6-blue.svg)](https://github.com/django/django)
-[![gunicorn](https://img.shields.io/badge/gunicorn-22.0.0-blue.svg)](https://github.com/benoitc/gunicorn)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/release/python-3110/)
+[![PyTorch](https://img.shields.io/badge/pytorch-2.4.1-red.svg?logo=pytorch)](https://pytorch.org/)
+[![Flask](https://img.shields.io/badge/Flask-3.0.3-blue.svg?logo=flask)](https://flask.palletsprojects.com/)
 [![Hugging Face](https://img.shields.io/badge/huggingface-transformers-yellow.svg?logo=huggingface)](https://huggingface.co/transformers/)
-[![Simple Transformers](https://img.shields.io/badge/simple-transformers-orange.svg)](https://simpletransformers.ai/)
-[![CUDA](https://img.shields.io/badge/cuda-11.0-green.svg)](https://developer.nvidia.com/cuda-toolkit)
+[![SpaCy](https://img.shields.io/badge/spacy-3.7.5-blue.svg?logo=spacy)](https://spacy.io/)
 
 Welcome to the official repository of Roamify Chrome Extension. This repository contains the code and documentation for our innovative approach to providing personalized travel recommendations using a chrome extension.
 
@@ -17,6 +15,7 @@ Welcome to the official repository of Roamify Chrome Extension. This repository 
 ## Table of Contents
 
 - [Introduction](#introduction)
+- [Getting Started](#getting-started)
 - [Directory Structure](#directory-structure)
 - [Extension Objectives](#extension-objectives)
 - [Citing This Work](#citing-this-work)
@@ -25,6 +24,40 @@ Welcome to the official repository of Roamify Chrome Extension. This repository 
 ## Introduction
 
 Roamify aims to revolutionize the travel experience by leveraging the power of machine learning to provide personalized recommendations through a google chrome extension.
+
+## Getting Started
+
+### 1. Environment Setup
+We recommend using `mamba` or `conda` to manage your environment:
+```bash
+mamba create -n roamify_env python=3.11 -y
+mamba activate roamify_env
+```
+
+### 2. Installation
+Install the consolidated requirements and set up the necessary AI model data:
+```bash
+# Install Python packages
+python -m pip install -r requirements.txt
+
+# Download SpaCy Language Model
+python -m spacy download en_core_web_lg
+
+# Pre-download NLTK resources
+python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords')"
+```
+
+### 3. Running the Backend
+Start the Flask server from the root directory:
+```bash
+python backend/run.py
+```
+The server will start on `http://localhost:5001`.
+
+### 4. Running the Frontend (Chrome Extension)
+1. Open Chrome and navigate to `chrome://extensions/`.
+2. Enable **Developer mode**.
+3. Click **Load unpacked** and select the `/src` folder of this repository.
 
 ## Directory Structure
 

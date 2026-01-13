@@ -1,45 +1,61 @@
+import logging
+from typing import List
+
 import torch
-from transformers import BertForQuestionAnswering
-from transformers import BertTokenizer
+from transformers import BertForQuestionAnswering, BertTokenizer
+
+logger = logging.getLogger(__name__)
 
 
-class BERT_Processer:
-    def __init__(self):
-        self.tokenizer = BertTokenizer.from_pretrained(
-            "bert-large-uncased-whole-word-masking-finetuned-squad"
-        )
-        self.model = BertForQuestionAnswering.from_pretrained(
-            "bert-large-uncased-whole-word-masking-finetuned-squad"
-        )
+class BERTProcessor:
+    """Handles question answering using a BERT model."""
 
-    def answer_question(self, question, paragraph):
+    def __init__(self, model_name: str = "bert-large-uncased-whole-word-masking-finetuned-squad"):
+        logger.info(f"Initializing BERT model: {model_name}")
+        self.tokenizer = BertTokenizer.from_pretrained(model_name)
+        
+        # Determine best available device
+        if torch.cuda.is_available():
+            self.device = torch.device("cuda")
+        elif torch.backends.mps.is_available():
+            self.device = torch.device("mps")
+        else:
+            self.device = torch.device("cpu")
+            
+        logger.info(f"BERT model using device: {self.device}")
+        self.model = BertForQuestionAnswering.from_pretrained(model_name).to(self.device)
+
+    def answer_question(self, question: str, context: str) -> str:
+        """Extracts an answer to the question from the provided context."""
         encoding = self.tokenizer.encode_plus(
-            text=question, text_pair=paragraph, add_special_tokens=True
-        )
-        input_ids = encoding["input_ids"]  # Token embeddings
-        token_type_ids = encoding["token_type_ids"]  # Segment embeddings
-        tokens = self.tokenizer.convert_ids_to_tokens(input_ids)  # Input tokens
+            text=question, 
+            text_pair=context, 
+            add_special_tokens=True,
+            return_tensors="pt"
+        ).to(self.device)
+        
+        input_ids = encoding["input_ids"]
+        token_type_ids = encoding["token_type_ids"]
 
-        input_ids = torch.tensor([input_ids])
-        token_type_ids = torch.tensor([token_type_ids])
-
-        # Get the start and end scores from the model
-        outputs = self.model(input_ids=input_ids, token_type_ids=token_type_ids)
+        with torch.no_grad():
+            outputs = self.model(input_ids=input_ids, token_type_ids=token_type_ids)
+            
         start_scores = outputs.start_logits
         end_scores = outputs.end_logits
 
         start_index = torch.argmax(start_scores)
-        end_index = torch.argmax(end_scores) + 1
+        end_index = torch.argmax(end_scores)
 
-        answer = " ".join(tokens[start_index : end_index + 1])
-
-        corrected_answer = ""
-
-        for word in answer.split():
-            # If it's a subword token
-            if word[0:2] == "##":
-                corrected_answer += word[2:]
+        # Convert tokens back to string
+        tokens = self.tokenizer.convert_ids_to_tokens(input_ids[0])
+        answer_tokens = tokens[start_index : end_index + 1]
+        
+        # Handle subword tokens (##)
+        answer = ""
+        for word in answer_tokens:
+            if word.startswith("##"):
+                answer += word[2:]
             else:
-                corrected_answer += " " + word
-
-        return corrected_answer
+                answer += " " + word
+        
+        return answer.strip()
