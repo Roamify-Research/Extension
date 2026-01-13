@@ -24,25 +24,30 @@
       </div>
     </div>
   </header>
-  <main class="main-content" id="main-content">
-    <h2 class="greeting-text">Welcome back, Noel</h2>
-    <p class="destination-prompt">Where do you want to go?</p>
-    <div class="destination-container">
-      <input type="text" id="destinationInput" placeholder="Enter Destination" />
-      <div id="suggestionsContainer" class="suggestions-container"></div>
-    </div>
-    <div class="predefined-options-container"></div>
+  <main class="main-content">
+    <div id="input-section">
+      <h2 class="greeting-text">Welcome back, Noel</h2>
+      <p class="destination-prompt">Where do you want to go?</p>
+      <div class="destination-container">
+        <input type="text" id="destinationInput" placeholder="Enter Destination" />
+        <div id="suggestionsContainer" class="suggestions-container"></div>
+      </div>
+      <div class="predefined-options-container"></div>
 
-    <p class="day-prompt">How many Days are you planning to stay?</p>
-    <div class="day-container"></div>
-    <p class="fine-tune" id="fine-tune">Fine Tune</p>
-    <div class="frame-box" id="sliderFrame">
-      <div class="details-container"></div>
+      <p class="day-prompt">How many Days are you planning to stay?</p>
+      <div class="day-container"></div>
+      <div class="frame-box" id="sliderFrame">
+        <div class="details-container"></div>
+      </div>
+      <div class="generate-itinerary">
+        <button id="generateBtn" class="generate-itinerary-button">Generate Itinerary</button>
+      </div>
     </div>
-    <div class="generate-itinerary">
-      <button class="generate-itinerary-button">Generate Itinerary</button>
+    <div id="backButtonContainer" style="display: none; text-align: left; margin-bottom: 20px;">
+      <button id="backButton" class="generate-itinerary-button" style="padding: 5px 15px; font-size: 1em;">&larr;
+        Back</button>
     </div>
-    <div id="main-content" class="main-box"></div>
+    <div id="result-section" class="main-box" style="display: none;"></div>
   </main>
   <button class="floating-button" id="downloadButton">↓</button>
   <script src="scripts/itinerary.js"></script>

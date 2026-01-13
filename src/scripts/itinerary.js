@@ -71,7 +71,7 @@ document.addEventListener("DOMContentLoaded", function () {
   );
   const dayContainer = document.querySelector(".day-container");
   const additionalDataContainer = document.querySelector(".details-container");
-  const generateButton = document.querySelector(".generate-itinerary-button");
+  const generateButton = document.getElementById("generateBtn");
 
   // Sample predefined options
   const predefinedOptions = ["Vietnam", "Delhi", "New York", "Tokyo", "Sydney"];
@@ -357,7 +357,9 @@ async function sendToBackend(data) {
       document.body.removeChild(loadingOverlay);
       document.body.style.pointerEvents = "auto";
       console.error("Error processing the itinerary:", error);
-      const preElement = document.getElementById("main-content");
+      console.error("Error processing the itinerary:", error);
+      showResultView();
+      const preElement = document.getElementById("result-section");
       preElement.textContent = "Error processing the itinerary. Please check if backend is running.";
     });
 }
@@ -389,10 +391,24 @@ function extractAttractions(doc) {
 
 let storedResponse = null;
 
+
+function showInputView() {
+  document.getElementById("input-section").style.display = "block";
+  document.getElementById("result-section").style.display = "none";
+  document.getElementById("backButtonContainer").style.display = "none";
+  document.getElementById("downloadButton").style.display = "none";
+}
+
+function showResultView() {
+  document.getElementById("input-section").style.display = "none";
+  document.getElementById("result-section").style.display = "block";
+  document.getElementById("backButtonContainer").style.display = "block";
+}
+
 function displayCards(response) {
   storedResponse = response; // Store the response data
-  document.getElementById("main-content").style.display = "block";
-  const preElement = document.getElementById("main-content");
+  showResultView();
+  const preElement = document.getElementById("result-section");
   preElement.textContent = "";
 
   const cardsContainer = document.createElement("div");
@@ -402,36 +418,92 @@ function displayCards(response) {
     const card = document.createElement("div");
     card.className = "card";
 
-    // Create and append card header
+    // Header (Day X)
     const cardHeader = document.createElement("div");
     cardHeader.className = "card-header";
-    cardHeader.textContent = day;
+    // If day text is "Day 1: Arrival", split it to just "DAY 1"
+    const dayMatch = day.match(/^(Day \d+)/i);
+    cardHeader.textContent = dayMatch ? dayMatch[1].toUpperCase() : day.toUpperCase();
     card.appendChild(cardHeader);
 
-    // Create and append card body
+    // Sub-header (Attractions summary - roughly extracted from items or skipped)
+    // For now, let's leave sub-header empty or try to extract top locations?
+    // The user image shows locations on the right. We might skip if we can't easily extract.
+    // Let's create a placeholder if needed or parse from activity list?
+    // Actually, let's put the full day title here if it has more info.
+    if (day.includes(":")) {
+      const cardSub = document.createElement("div");
+      cardSub.className = "card-sub-header";
+      cardSub.textContent = day.split(":")[1].trim();
+      card.appendChild(cardSub);
+    }
+
+    // Body
     const cardBody = document.createElement("div");
     cardBody.className = "card-body";
 
     activities.forEach((activity, index) => {
-      if (activity.trim() !== "") {
-        // Check if activity is not an empty string
+      if (activity && activity.trim() !== "") {
         const activityElement = document.createElement("div");
         activityElement.className = "card-activity";
 
-        // Add activity description
-        const description = document.createElement("p");
-        description.className = "card-item";
-        description.textContent = activity;
-        activityElement.appendChild(description);
+        // Advanced Parsing Logic
+        // Strategy: Look for "Time: Title - Desc" or "Time: Desc"
+        // Heuristic: Split by first colon to get Time/Header.
+        // Advanced Parsing Logic
+        // Regex to capture "Title (Time): Description" or "Title: Description"
+        // We look for a colon that serves as a separator.
+        // Case 1: "Morning (9:00 AM): Start..." -> Header: "Morning (9:00 AM)", Body: "Start..."
+        // Case 2: "Morning: Start..." -> Header: "Morning", Body: "Start..."
+        // We generally want to split on the FIRST colon that is NOT inside parentheses, or just use a robust regex.
 
-        // Optionally add a divider between activities, unless it's a "Leisure day"
-        if (day !== "Leisure day" && index < activities.length - 1) {
-          // Check if the next activity is not an empty string before adding a divider
-          if (activities[index + 1].trim() !== "") {
-            const divider = document.createElement("hr");
-            divider.className = "activity-divider";
-            activityElement.appendChild(divider);
-          }
+        // This regex looks for:
+        // ^(.*?)       -> Group 1: The Header (non-greedy start)
+        // (?:          -> Non-capturing group for the separator
+        //   \):\s*     -> "):" followed by optional space (common in "Time):")
+        //   |          -> OR
+        //   :\s+       -> ":" followed by at least one space (to avoid splitting "9:00")
+        // )
+        // (.*)$        -> Group 2: The Description (rest of line)
+
+        const match = activity.match(/^(.*?)(?:\):\s*|:\s+)(.*)$/);
+
+        let headerText = "";
+        let descText = activity;
+
+        if (match) {
+          headerText = match[1].trim();
+          descText = match[2].trim();
+        } else {
+          // Fallback: Check if it's just a short header line?
+          // If no colon separator found, treat whole line as description (or title if short?)
+          // For now, keep as description.
+        }
+
+        // DOM Creation
+        if (headerText) {
+          // We put the whole "Morning (9:00 AM)" into a single bold title block
+          // per the user's latest image where it's all one bold line.
+          const titleEl = document.createElement("span");
+          titleEl.className = "activity-title";
+          titleEl.textContent = headerText + ":"; // Add colon back for style if desired, or not. Image doesn't show colon clearly but implies separation
+          // Actually image shows "Morning (9:00 AM)" as bold title.
+          // Let's NOT add the colon back if we want clean look, but the text might need it contextually.
+          // The user image shows "Morning (9:00 AM)" then description below.
+          // Let's keep it clean.
+          activityElement.appendChild(titleEl);
+        }
+
+        const descEl = document.createElement("span");
+        descEl.className = "activity-desc";
+        descEl.textContent = descText;
+        activityElement.appendChild(descEl);
+
+        // Divider
+        if (index < activities.length - 1) {
+          const divider = document.createElement("hr");
+          divider.className = "activity-divider";
+          activityElement.appendChild(divider);
         }
 
         cardBody.appendChild(activityElement);
@@ -443,8 +515,6 @@ function displayCards(response) {
   }
 
   preElement.appendChild(cardsContainer);
-
-  // Show the download button after cards are displayed
   document.getElementById("downloadButton").style.display = "block";
 }
 
@@ -496,6 +566,14 @@ function saveItinerary(destination, content) {
   });
 }
 
+
+document.addEventListener("DOMContentLoaded", () => {
+  const backBtn = document.getElementById("backButton");
+  if (backBtn) {
+    backBtn.addEventListener("click", showInputView);
+  }
+});
+
 function fetchHistory() {
   chrome.storage.local.get(["authToken"], (result) => {
     if (!result.authToken) return;
@@ -506,8 +584,8 @@ function fetchHistory() {
 }
 
 function showHistoryList(itineraries) {
-  const main = document.getElementById("main-content");
-  main.style.display = "block";
+  showResultView();
+  const main = document.getElementById("result-section");
   main.innerHTML = "<h2>My Trips</h2><div class='cards-container' id='historyContainer'></div>";
   const container = document.getElementById("historyContainer");
 
