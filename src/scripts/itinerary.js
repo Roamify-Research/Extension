@@ -50,18 +50,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Logout Handler (Delegated since structure might vary)
   // We attach to the container '.options' or directly to document
-  document.addEventListener("click", (e) => {
-    // Traverse up to find if a link was clicked
-    let target = e.target;
-    if (target.tagName === 'IMG') target = target.parentElement;
-
-    if (target.tagName === 'A' && target.textContent.includes('Logout')) {
+  // Logout Handler
+  const logoutLink = document.getElementById("logoutLink");
+  if (logoutLink) {
+    logoutLink.addEventListener("click", (e) => {
       e.preventDefault();
       chrome.storage.local.remove(["authToken", "username", "name"], () => {
         window.location.href = "panel.html";
       });
-    }
-  });
+    });
+  }
   // --- END AUTH LOGIC ---
 
   const accountButton = document.getElementById("accountButton");
@@ -485,7 +483,7 @@ document.getElementById("downloadButton").addEventListener("click", () => {
 });
 
 // --- HISTORY FUNCTIONS ---
-const API_BASE = "http://127.0.0.1:5001";
+const API_BASE = "https://roamify.fakepickle.tech";
 
 function saveItinerary(destination, content) {
   chrome.storage.local.get(["authToken"], (result) => {
