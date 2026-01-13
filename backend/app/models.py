@@ -30,3 +30,12 @@ class User(db.Model):
             return User.query.get(payload['user_id'])
         except:
             return None
+
+class Itinerary(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    destination = db.Column(db.String(100), nullable=False)
+    content = db.Column(db.JSON, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    user = db.relationship('User', backref=db.backref('itineraries', lazy=True))

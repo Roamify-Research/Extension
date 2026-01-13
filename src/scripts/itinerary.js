@@ -37,6 +37,17 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
+  // History Handler
+  const historyLink = document.getElementById("historyLink");
+  if (historyLink) {
+    historyLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      const accountDropdown = document.getElementById("accountDropdown");
+      if (accountDropdown) accountDropdown.classList.remove("active");
+      fetchHistory();
+    });
+  }
+
   // Logout Handler (Delegated since structure might vary)
   // We attach to the container '.options' or directly to document
   document.addEventListener("click", (e) => {
@@ -342,6 +353,7 @@ async function sendToBackend(data) {
       document.body.removeChild(loadingOverlay);
       document.body.style.pointerEvents = "auto";
       displayCards(response);
+      saveItinerary(data.destination, response);
     })
     .catch((error) => {
       document.body.removeChild(loadingOverlay);
@@ -471,3 +483,58 @@ document.getElementById("downloadButton").addEventListener("click", () => {
     alert("No data available to download.");
   }
 });
+
+// --- HISTORY FUNCTIONS ---
+const API_BASE = "http://127.0.0.1:5001";
+
+function saveItinerary(destination, content) {
+  chrome.storage.local.get(["authToken"], (result) => {
+    if (!result.authToken) return;
+    fetch(`${API_BASE}/itinerary/save`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${result.authToken}` },
+      body: JSON.stringify({ destination, content })
+    }).then(r => r.json()).then(d => console.log("Saved:", d)).catch(e => console.error(e));
+  });
+}
+
+function fetchHistory() {
+  chrome.storage.local.get(["authToken"], (result) => {
+    if (!result.authToken) return;
+    fetch(`${API_BASE}/itinerary/list`, {
+      headers: { "Authorization": `Bearer ${result.authToken}` }
+    }).then(r => r.json()).then(showHistoryList).catch(e => console.error(e));
+  });
+}
+
+function showHistoryList(itineraries) {
+  const main = document.getElementById("main-content");
+  main.style.display = "block";
+  main.innerHTML = "<h2>My Trips</h2><div class='cards-container' id='historyContainer'></div>";
+  const container = document.getElementById("historyContainer");
+
+  if (!itineraries || itineraries.length === 0) {
+    main.innerHTML += "<p>No saved itineraries found.</p>";
+    return;
+  }
+
+  itineraries.forEach(it => {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.style.cursor = "pointer";
+    card.innerHTML = `<div class='card-header'>${it.destination}</div><div class='card-body'><p>${new Date(it.created_at).toLocaleDateString()}</p></div>`;
+    card.addEventListener("click", () => loadItinerary(it.id));
+    container.appendChild(card);
+  });
+}
+
+function loadItinerary(id) {
+  chrome.storage.local.get(["authToken"], (result) => {
+    if (!result.authToken) return;
+    fetch(`${API_BASE}/itinerary/${id}`, {
+      headers: { "Authorization": `Bearer ${result.authToken}` }
+    }).then(r => r.json()).then(data => {
+      if (data.content) displayCards(data.content);
+    }).catch(e => console.error(e));
+  });
+}

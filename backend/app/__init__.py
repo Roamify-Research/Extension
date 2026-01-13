@@ -23,9 +23,11 @@ def create_app():
     # Register Blueprints
     from app.routes.process import process_bp
     from app.routes.auth import auth_bp
+    from app.routes.itinerary import itinerary_bp
 
     app.register_blueprint(process_bp)
     app.register_blueprint(auth_bp)
+    app.register_blueprint(itinerary_bp)
 
     # Create Database Tables
     with app.app_context():
