@@ -30,8 +30,7 @@ class ollama_processor:
             f"3. Only include valid tourist attractions (museums, parks, forts, temples, etc.).\n"
             f"4. If a suggested place seems invalid or irrelevant, DISCARD it.\n"
             f"5. Structure the response day by day.\n"
-            f"6. Adjust the itinerary based on the cultural preference: {cultural_guidance}\n\n"
-            f"Suggested Places:\n"
+            f"Suggested Places from the scraped text:\n"
         )
         
         count = 1
