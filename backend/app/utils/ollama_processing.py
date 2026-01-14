@@ -68,3 +68,114 @@ class ollama_processor:
             return result.get("response", "Error: No response from model")
         except Exception as e:
             return f"Error: {str(e)}"
+
+    def chat(self, message: str, itinerary: dict, chat_history: list) -> str:
+        """
+        Handle a chat message about the itinerary using Ollama.
+        
+        Args:
+            message: The user's message
+            itinerary: Current itinerary dict
+            chat_history: List of previous messages [{"role": "user"|"assistant", "content": "..."}]
+            
+        Returns:
+            AI response string
+        """
+        # Format itinerary for context
+        itinerary_text = ""
+        for day, activities in itinerary.items():
+            itinerary_text += f"\n{day}:\n"
+            for activity in activities:
+                itinerary_text += f"  - {activity}\n"
+        
+        # Format chat history (last 6 messages for context)
+        history_text = ""
+        for msg in chat_history[-6:]:
+            role = "User" if msg["role"] == "user" else "Assistant"
+            history_text += f"{role}: {msg['content']}\n"
+        
+        prompt = f"""You are Roamify's friendly travel assistant chatbot. You're helping a user with their travel itinerary.
+
+Current Itinerary:
+{itinerary_text}
+
+Previous conversation:
+{history_text}
+
+User's message: {message}
+
+Respond helpfully and conversationally. If they're asking about the itinerary, refer to specific details. If they want changes, acknowledge what they want and tell them to click "Modify Itinerary" to apply the changes. Keep responses concise but friendly (2-3 sentences max).
+
+Your response:"""
+
+        payload = {"model": "llama3.1:latest", "prompt": prompt, "stream": False}
+        try:
+            response = requests.post(self.url, headers=self.headers, json=payload, timeout=60)
+            response.raise_for_status()
+            result = response.json()
+            return result.get("response", "Sorry, I couldn't generate a response.")
+        except Exception as e:
+            print(f"Ollama chat error: {e}")
+            return f"Sorry, I encountered an error: {str(e)}"
+
+    def modify_itinerary(self, chat_history: list, original_itinerary: dict, preferences: dict) -> str:
+        """
+        Generate a modified itinerary based on chat feedback.
+        
+        Args:
+            chat_history: List of chat messages
+            original_itinerary: Current itinerary dict  
+            preferences: Original generation preferences
+            
+        Returns:
+            Modified itinerary text (to be parsed later)
+        """
+        # Extract user feedback from chat
+        user_messages = [msg["content"] for msg in chat_history if msg["role"] == "user"]
+        feedback_text = "\n".join([f"- {msg}" for msg in user_messages])
+        
+        # Format original itinerary
+        itinerary_text = ""
+        for day, activities in original_itinerary.items():
+            itinerary_text += f"\n{day}:\n"
+            for activity in activities:
+                itinerary_text += f"  - {activity}\n"
+        
+        destination = preferences.get("destination", "the destination")
+        days = preferences.get("day", 3)
+        historical = preferences.get("historical", 3)
+        amusement = preferences.get("amusement", 3)
+        natural = preferences.get("natural", 3)
+        cultural = preferences.get("cultural", 3)
+        
+        prompt = f"""You are an expert travel agent. Modify this {days}-day itinerary for {destination} based on user feedback.
+
+User Preferences: Historical: {historical}/5, Amusement: {amusement}/5, Natural: {natural}/5, Cultural: {cultural}/5
+
+Original itinerary:
+{itinerary_text}
+
+User's requested changes:
+{feedback_text}
+
+Generate a MODIFIED itinerary that incorporates the user's feedback. Keep the same day-by-day format:
+
+Day 1: [Theme]
+- Morning: Activity
+- Afternoon: Activity
+- Evening: Activity
+
+Day 2: [Theme]
+...
+
+Modified itinerary:"""
+
+        payload = {"model": "llama3.1:latest", "prompt": prompt, "stream": False}
+        try:
+            response = requests.post(self.url, headers=self.headers, json=payload, timeout=120)
+            response.raise_for_status()
+            result = response.json()
+            return result.get("response", "Error: No response from model")
+        except Exception as e:
+            print(f"Ollama modify error: {e}")
+            return f"Error: {str(e)}"

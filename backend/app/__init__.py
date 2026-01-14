@@ -24,10 +24,12 @@ def create_app():
     from app.routes.process import process_bp
     from app.routes.auth import auth_bp
     from app.routes.itinerary import itinerary_bp
+    from app.routes.chat import chat_bp
 
     app.register_blueprint(process_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(itinerary_bp)
+    app.register_blueprint(chat_bp)
 
     # Create Database Tables
     with app.app_context():

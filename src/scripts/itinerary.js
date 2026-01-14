@@ -21,6 +21,10 @@ let history_value = 0;
 let amusement_value = 0;
 let natural_value = 0;
 
+// Chatbot state (session-only, not persisted)
+let chatHistory = [];
+let generationParams = null;
+
 document.addEventListener("DOMContentLoaded", function () {
   // --- AUTH & LOGOUT LOGIC ---
   chrome.storage.local.get(["authToken", "username", "name"], (result) => {
@@ -362,6 +366,11 @@ async function getActiveTabUrl() {
 }
 
 async function sendToBackend(data) {
+  // Store generation parameters for modify functionality
+  generationParams = data;
+  // Clear chat history when generating new itinerary
+  chatHistory = [];
+
   // Create loading overlay
   const loadingOverlay = document.createElement("div");
   loadingOverlay.className = "loading-overlay";
@@ -426,6 +435,10 @@ function showInputView() {
   document.getElementById("result-section").style.display = "none";
   document.getElementById("backButtonContainer").style.display = "none";
   document.getElementById("downloadButton").style.display = "none";
+  // Hide chatbot when going back to planner
+  document.getElementById("chatbot-container").style.display = "none";
+  const chatWindow = document.getElementById("chatbot-window");
+  if (chatWindow) chatWindow.classList.remove("active");
 }
 
 function showResultView() {
@@ -437,6 +450,8 @@ function showResultView() {
 function displayCards(response) {
   storedResponse = response; // Store the response data
   showResultView();
+  // Show chatbot container when itinerary is displayed
+  document.getElementById("chatbot-container").style.display = "flex";
   const preElement = document.getElementById("result-section");
   preElement.textContent = "";
 
@@ -565,6 +580,20 @@ document.getElementById("downloadButton").addEventListener("click", () => {
   }
 });
 
+// --- CHATBOT HELPER FUNCTIONS ---
+function appendChatMessage(role, content) {
+  const container = document.getElementById("chatbot-messages");
+  if (!container) return;
+
+  const messageDiv = document.createElement("div");
+  messageDiv.className = `chat-message ${role}`;
+  messageDiv.textContent = content;
+  container.appendChild(messageDiv);
+
+  // Scroll to bottom
+  container.scrollTop = container.scrollHeight;
+}
+
 // --- HISTORY FUNCTIONS ---
 const API_BASE = "https://roamify.fakepickle.tech";
 
@@ -584,6 +613,141 @@ document.addEventListener("DOMContentLoaded", () => {
   const backBtn = document.getElementById("backButton");
   if (backBtn) {
     backBtn.addEventListener("click", showInputView);
+  }
+
+  // --- CHATBOT TOGGLE LOGIC ---
+  const chatbotToggle = document.getElementById("chatbot-toggle");
+  const chatbotWindow = document.getElementById("chatbot-window");
+  const chatbotClose = document.getElementById("chatbot-close");
+  const chatbotInput = document.getElementById("chatbot-input");
+  const chatbotSend = document.getElementById("chatbot-send");
+  const modifyItineraryBtn = document.getElementById("modify-itinerary-btn");
+
+  if (chatbotToggle && chatbotWindow) {
+    // Toggle chatbot window open/close
+    chatbotToggle.addEventListener("click", () => {
+      chatbotWindow.classList.toggle("active");
+      // Focus input when opening
+      if (chatbotWindow.classList.contains("active") && chatbotInput) {
+        setTimeout(() => chatbotInput.focus(), 100);
+      }
+    });
+
+    // Close button
+    if (chatbotClose) {
+      chatbotClose.addEventListener("click", () => {
+        chatbotWindow.classList.remove("active");
+      });
+    }
+
+    // Send message to Gemini API
+    if (chatbotSend && chatbotInput) {
+      const sendMessage = async () => {
+        const message = chatbotInput.value.trim();
+        if (!message) return;
+
+        // Add user message to chat
+        appendChatMessage("user", message);
+        chatHistory.push({ role: "user", content: message });
+        chatbotInput.value = "";
+        chatbotSend.disabled = true;
+
+        try {
+          const response = await fetch(`${API_BASE}/chat`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              message: message,
+              itinerary: storedResponse || {},
+              history: chatHistory
+            })
+          });
+
+          const data = await response.json();
+
+          if (data.response) {
+            appendChatMessage("assistant", data.response);
+            chatHistory.push({ role: "assistant", content: data.response });
+          } else if (data.error) {
+            appendChatMessage("assistant", `Error: ${data.error}`);
+          }
+        } catch (error) {
+          console.error("Chat error:", error);
+          appendChatMessage("assistant", "Sorry, I encountered an error. Please try again.");
+        } finally {
+          chatbotSend.disabled = false;
+          chatbotInput.focus();
+        }
+      };
+
+      chatbotSend.addEventListener("click", sendMessage);
+      chatbotInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") sendMessage();
+      });
+    }
+
+    // Modify Itinerary button
+    if (modifyItineraryBtn) {
+      modifyItineraryBtn.addEventListener("click", async () => {
+        if (chatHistory.length === 0) {
+          alert("Please chat about your desired changes first!");
+          return;
+        }
+
+        if (!storedResponse) {
+          alert("No itinerary to modify.");
+          return;
+        }
+
+        // Show loading
+        const loadingOverlay = document.createElement("div");
+        loadingOverlay.className = "loading-overlay";
+        const loadingGif = document.createElement("img");
+        loadingGif.src = "assets/loading.gif";
+        loadingGif.className = "loading-gif";
+        loadingOverlay.appendChild(loadingGif);
+        document.body.appendChild(loadingOverlay);
+        document.body.style.pointerEvents = "none";
+
+        try {
+          const response = await fetch(`${API_BASE}/modify-itinerary`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              history: chatHistory,
+              original_itinerary: storedResponse,
+              preferences: generationParams || {}
+            })
+          });
+
+          const data = await response.json();
+
+          if (data.itinerary) {
+            // Update the displayed itinerary
+            displayCards(data.itinerary);
+
+            // Clear chat history after modification
+            chatHistory = [];
+            const messagesContainer = document.getElementById("chatbot-messages");
+            if (messagesContainer) {
+              messagesContainer.innerHTML = '<div class="chat-message assistant">Your itinerary has been updated! Ask me more questions or request additional changes.</div>';
+            }
+          } else if (data.error) {
+            alert(`Error modifying itinerary: ${data.error}`);
+          }
+        } catch (error) {
+          console.error("Modify itinerary error:", error);
+          alert("Failed to modify itinerary. Please try again.");
+        } finally {
+          document.body.removeChild(loadingOverlay);
+          document.body.style.pointerEvents = "auto";
+        }
+      });
+    }
   }
 });
 
