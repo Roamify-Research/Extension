@@ -8,7 +8,7 @@ class ollama_processor:
         self.headers = {"Content-Type": "application/json"}
 
     def ollama_attraction(
-        self, attractions: dict, days, historical, amusement, natural, destination=None
+        self, attractions: dict, days, historical=3, amusement=3, natural=3, cultural=3, destination=None
     ):
         # prompt = f"Generate an detailed itinerary for me for a {days} day trip and the user has rated {historical} for historical places  here are the suggested places I would like to cover:\n"
 
@@ -19,7 +19,8 @@ class ollama_processor:
         prompt = (
             f"You are an expert travel agent creating a perfect travel itinerary. "
             f"I need a {days}-day detailed itinerary for a trip{dest_str}. "
-            f"User Preferences (scale 1-10): Historical: {historical}, Amusement: {amusement}, Natural: {natural}.\n\n"
+            f"User Preferences (scale 1-10): Historical: {historical}, Amusement: {amusement}, Natural: {natural}.\n"
+            f"Cultural Preference (scale 1-5): {cultural}\n\n"
             f"Instructions:\n"
             f"1. Use the suggested places below to build the itinerary.\n"
             f"2. IMPORTANT: The provided list contains scraped data. You MUST IGNORE any junk information such as:\n"
@@ -28,7 +29,8 @@ class ollama_processor:
             f"   - Website navigation text (e.g., 'Click here', 'Read More')\n"
             f"3. Only include valid tourist attractions (museums, parks, forts, temples, etc.).\n"
             f"4. If a suggested place seems invalid or irrelevant, DISCARD it.\n"
-            f"5. Structure the response day by day.\n\n"
+            f"5. Structure the response day by day.\n"
+            f"6. Adjust the itinerary based on the cultural preference: {cultural_guidance}\n\n"
             f"Suggested Places:\n"
         )
         

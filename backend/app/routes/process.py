@@ -31,11 +31,12 @@ def process_text():
         historical = data.get("historical", 3)
         amusement = data.get("amusement", 3)
         natural = data.get("natural", 3)
+        cultural = data.get("cultural", 3)
 
         if "text" not in data or not data["text"]:
             # If text is not provided, use the modern Firecrawl + T5 flow
             formatted_data = pipeline_processor.t5_ollama_processing(
-                None, days, historical, amusement, natural, 
+                None, days, historical, amusement, natural, cultural,
                 destination=destination, url=url, urls=urls
             )
             return jsonify(formatted_data)
@@ -43,7 +44,7 @@ def process_text():
         text = data["text"]
         # Process the provided text
         formatted_data = pipeline_processor.t5_ollama_processing(
-            text, days, historical, amusement, natural, 
+            text, days, historical, amusement, natural, cultural,
             destination=destination, url=url, urls=urls
         )
         return jsonify(formatted_data)

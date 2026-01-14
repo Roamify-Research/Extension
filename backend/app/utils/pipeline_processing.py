@@ -96,7 +96,7 @@ class Pipeline:
             result[name] = processed_document[key]
         return result
 
-    def t5_ollama_processing(self, document, days, historical, amusement, natural, destination=None, url=None, urls=None):
+    def t5_ollama_processing(self, document, days, historical, amusement, natural, cultural, destination=None, url=None, urls=None):
         # If document (text) is not provided, try to fetch it using Firecrawl
         if not document or len(document.strip()) < 50:
             # Consolidate text from multiple sources
@@ -149,7 +149,7 @@ class Pipeline:
             processed_document[key] = result
 
         itenary_text = self.ollama_processor.ollama_attraction(
-            processed_document, days, historical, amusement, natural, destination=destination
+            processed_document, days, historical, amusement, natural, cultural, destination=destination
         )
         return self.nlp_processor.parse_itinerary(itenary_text)
 

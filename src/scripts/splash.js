@@ -1,48 +1,40 @@
 window.onload = () => {
+  const splashContainer = document.querySelector(".splash-container");
   const mainContainer = document.getElementById("mainContainer");
-  const loginContainer = document.getElementById("loginContainer");
-  const loginForm = document.getElementById("loginForm");
-  const signupForm = document.getElementById("signupForm");
-  const signupLink = document.getElementById("signupLink");
-  const loginLink = document.getElementById("loginLink");
+  const authContainer = document.getElementById("authContainer");
   const body = document.body;
+
+  // Check for saved dark mode preference
+  chrome.storage.local.get(["darkMode"], (result) => {
+    if (result.darkMode) {
+      document.body.classList.add("dark-mode");
+    }
+  });
 
   // Check for existing token
   chrome.storage.local.get(["authToken"], (result) => {
     if (result.authToken) {
       // If token exists, skip splash/login and go straight to app
       window.location.href = "itinerary.html";
+      return;
     }
   });
 
-  setTimeout(() => {
-    body.style.backgroundColor = "#251F48";
-    mainContainer.style.display = "flex";
-    mainContainer.classList.add("slide-in");
+  // Hide splash immediately and show ROAMIFY text
+  splashContainer.style.display = "none";
+  body.style.backgroundColor = "#f1f5f9";
+  mainContainer.style.display = "flex";
+  mainContainer.classList.add("slide-in");
 
-    document.addEventListener(
-      "click",
-      () => {
-        mainContainer.classList.add("move-up");
-        loginContainer.classList.add("slide-up");
-      },
-      { once: true }
-    );
-  }, 3000);
+  // Wait for user click to show auth form
+  document.addEventListener(
+    "click",
+    () => {
+      mainContainer.classList.add("move-up");
+      authContainer.classList.add("slide-up");
+    },
+    { once: true }
+  );
 
-  // Switch to sign-up form
-  signupLink.addEventListener("click", (e) => {
-    e.preventDefault();
-    loginForm.style.display = "none";
-    signupForm.style.display = "block";
-  });
-
-  // Switch to login form
-  loginLink.addEventListener("click", (e) => {
-    e.preventDefault();
-    signupForm.style.display = "none";
-    loginForm.style.display = "block";
-  });
-
-  // Submit handlers are now in rules/auth.js
+  // Form switching is now handled by tabs in auth.js
 };

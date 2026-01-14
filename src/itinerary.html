@@ -4,52 +4,174 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>New Page</title>
+  <title>Roamify - Plan Your Adventure</title>
   <link rel="stylesheet" href="styles/itinerary.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 
 <body>
+  <!-- Header -->
   <header class="header">
-    <h1>ROAMIFY</h1>
-    <button class="account-button" id="accountButton"></button>
+    <div class="header-content">
+      <div class="logo-container">
+        <div class="logo-icon">
+          <span>R</span>
+        </div>
+        <h1 class="logo-text">ROAMIFY</h1>
+      </div>
+      <div class="header-actions">
+        <button class="icon-button" id="mapButton">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
+            <line x1="8" y1="2" x2="8" y2="18"></line>
+            <line x1="16" y1="6" x2="16" y2="22"></line>
+          </svg>
+        </button>
+        <button class="icon-button" id="darkModeToggle" title="Toggle dark mode">
+          <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            style="display: none;">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+        <button class="account-button" id="accountButton">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </button>
+      </div>
+    </div>
     <div class="account-dropdown" id="accountDropdown">
       <img src="assets/profile_icon.png" alt="Account Icon" />
       <div class="options">
         <a href="#"><img src="assets/profile_icon.png" alt="Profile Icon" /> Profile</a>
         <a href="#"><img src="assets/info_icon.png" alt="About Us Icon" /> About Us</a>
-        <a href="#"><img src="assets/new_chat_icon.png" alt="New Chat Icon" /> New
-          Chat</a>
+        <a href="#"><img src="assets/new_chat_icon.png" alt="New Chat Icon" /> New Chat</a>
         <a href="#" id="historyLink"><img src="assets/guide_icon.png" alt="History Icon" /> My Trips</a>
         <a href="#" id="logoutLink"><img src="assets/logout_icon.png" alt="Logout Icon" /> Logout</a>
       </div>
     </div>
   </header>
+
+  <!-- Main Content -->
   <main class="main-content">
     <div id="input-section">
-      <h2 class="greeting-text">Welcome back, Noel</h2>
-      <p class="destination-prompt">Where do you want to go?</p>
-      <div class="destination-container">
-        <input type="text" id="destinationInput" placeholder="Enter Destination" />
-        <div id="suggestionsContainer" class="suggestions-container"></div>
-      </div>
-      <div class="predefined-options-container"></div>
+      <div class="planner-card">
+        <!-- Welcome Section -->
+        <div class="welcome-section">
+          <h2 class="greeting-text">Welcome back, Noel</h2>
+          <p class="subtitle-text">Let's plan your next adventure</p>
+        </div>
 
-      <p class="day-prompt">How many Days are you planning to stay?</p>
-      <div class="day-container"></div>
-      <div class="frame-box" id="sliderFrame">
-        <div class="details-container"></div>
-      </div>
-      <div class="generate-itinerary">
-        <button id="generateBtn" class="generate-itinerary-button">Generate Itinerary</button>
+        <!-- Destination Input -->
+        <div class="input-group">
+          <label class="input-label">Where do you want to go?</label>
+          <div class="destination-container">
+            <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+              fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+            <input type="text" id="destinationInput" placeholder="Enter destination" />
+            <div id="suggestionsContainer" class="suggestions-container"></div>
+          </div>
+
+          <!-- Quick Destinations -->
+          <div class="predefined-options-container"></div>
+        </div>
+
+        <!-- Duration Selector -->
+        <div class="input-group">
+          <div class="label-row">
+            <label class="input-label">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+              </svg>
+              Duration of stay
+            </label>
+            <span class="days-display" id="daysDisplay">1 Day</span>
+          </div>
+          <div class="day-container"></div>
+          <div class="slider-labels">
+            <span>1 day</span>
+            <span>14 days</span>
+          </div>
+        </div>
+
+        <!-- Interest Preferences -->
+        <div class="input-group">
+          <label class="input-label">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="4" y1="21" x2="4" y2="14"></line>
+              <line x1="4" y1="10" x2="4" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="12"></line>
+              <line x1="12" y1="8" x2="12" y2="3"></line>
+              <line x1="20" y1="21" x2="20" y2="16"></line>
+              <line x1="20" y1="12" x2="20" y2="3"></line>
+              <line x1="1" y1="14" x2="7" y2="14"></line>
+              <line x1="9" y1="8" x2="15" y2="8"></line>
+              <line x1="17" y1="16" x2="23" y2="16"></line>
+            </svg>
+            Customize your experience
+          </label>
+          <div class="frame-box" id="sliderFrame">
+            <div class="details-container"></div>
+          </div>
+        </div>
+
+        <!-- Generate Button -->
+        <div class="generate-itinerary">
+          <button id="generateBtn" class="generate-itinerary-button">
+            Generate Itinerary
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </button>
+        </div>
       </div>
     </div>
-    <div id="backButtonContainer" style="display: none; text-align: left; margin-bottom: 20px;">
-      <button id="backButton" class="generate-itinerary-button" style="padding: 5px 15px; font-size: 1em;">&larr;
-        Back</button>
+
+    <!-- Back Button -->
+    <div id="backButtonContainer" style="display: none;">
+      <button id="backButton" class="back-button">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+        Back to planner
+      </button>
     </div>
+
+    <!-- Result Section -->
     <div id="result-section" class="main-box" style="display: none;"></div>
   </main>
+
+  <!-- Floating Download Button -->
   <button class="floating-button" id="downloadButton">↓</button>
+
   <script src="scripts/itinerary.js"></script>
 </body>
 

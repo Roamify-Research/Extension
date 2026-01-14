@@ -37,6 +37,27 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
+  // Dark Mode Toggle
+  const darkModeToggle = document.getElementById("darkModeToggle");
+
+  // Check for saved dark mode preference
+  chrome.storage.local.get(["darkMode"], (result) => {
+    if (result.darkMode) {
+      document.body.classList.add("dark-mode");
+    }
+  });
+
+  // Toggle dark mode
+  if (darkModeToggle) {
+    darkModeToggle.addEventListener("click", () => {
+      document.body.classList.toggle("dark-mode");
+      const isDarkMode = document.body.classList.contains("dark-mode");
+
+      // Save preference
+      chrome.storage.local.set({ darkMode: isDarkMode });
+    });
+  }
+
   // History Handler
   const historyLink = document.getElementById("historyLink");
   if (historyLink) {
@@ -215,21 +236,23 @@ document.addEventListener("DOMContentLoaded", function () {
   day_slider.step = 1;
   day_slider.className = "day-slider";
 
-  // Create a label to display the selected number of days
-  const dayLabel = document.createElement("span");
-  dayLabel.className = "day-label";
-  dayLabel.textContent = `${minDays} Days`;
-
-  // Append the slider and label to the day container
+  // Append the slider to the day container
   dayContainer.appendChild(day_slider);
-  dayContainer.appendChild(dayLabel);
 
-  // Update label when slider value changes
+  // Update the days display in the header when slider value changes
   day_slider.addEventListener("input", function () {
-    dayLabel.textContent = `${this.value} Days`;
+    const daysText = this.value === "1" ? "Day" : "Days";
+
+    // Update the days display in the header
+    const daysDisplay = document.getElementById("daysDisplay");
+    if (daysDisplay) {
+      daysDisplay.textContent = `${this.value} ${daysText}`;
+    }
   });
+
   //additionalDataContainer
   const sliders = {};
+
   const createSlider = (min, max, initialValue, label, id) => {
     const wrapper = document.createElement("div");
     wrapper.className = "slider-wrapper";
@@ -271,13 +294,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
   //historical
   const sliderElements = [
-    createSlider(0, 5, 3, "Historical", "history"),
-    createSlider(0, 5, 3, "Amusement", "amusement"),
-    createSlider(0, 5, 3, "Natural", "natural"),
+    createSlider(1, 5, 3, "Historical", "history"),
+    createSlider(1, 5, 3, "Amusement", "amusement"),
+    createSlider(1, 5, 3, "Natural", "natural"),
+    createSlider(1, 5, 3, "Cultural", "cultural"),
   ];
   sliderElements.forEach((slider) =>
     additionalDataContainer.appendChild(slider)
   );
+
 
   // Handle button click to store values and redirect
   generateButton.addEventListener("click", async function () {
@@ -286,6 +311,8 @@ document.addEventListener("DOMContentLoaded", function () {
     natural_value = sliders["natural"].value;
     const destination = destinationInput.value;
     days = day_slider.value;
+    const cultural_value = sliders["cultural"].value;
+
 
     console.log("Generate button clicked:");
     console.log("  Destination:", destination);
@@ -293,6 +320,7 @@ document.addEventListener("DOMContentLoaded", function () {
     console.log("  History:", history_value);
     console.log("  Amusement:", amusement_value);
     console.log("  Natural:", natural_value);
+    console.log("  Cultural:", cultural_value);
 
     // Unified logic: Always collect URLs from all tabs, and send both destination + urls
     chrome.tabs.query({}, async (tabs) => {
@@ -306,7 +334,8 @@ document.addEventListener("DOMContentLoaded", function () {
         day: days,
         historical: history_value,
         amusement: amusement_value,
-        natural: natural_value
+        natural: natural_value,
+        cultural: cultural_value
       };
 
       console.log("Submitting unified data:", data);
@@ -421,22 +450,28 @@ function displayCards(response) {
     // Header (Day X)
     const cardHeader = document.createElement("div");
     cardHeader.className = "card-header";
-    // If day text is "Day 1: Arrival", split it to just "DAY 1"
-    const dayMatch = day.match(/^(Day \d+)/i);
-    cardHeader.textContent = dayMatch ? dayMatch[1].toUpperCase() : day.toUpperCase();
-    card.appendChild(cardHeader);
 
-    // Sub-header (Attractions summary - roughly extracted from items or skipped)
-    // For now, let's leave sub-header empty or try to extract top locations?
-    // The user image shows locations on the right. We might skip if we can't easily extract.
-    // Let's create a placeholder if needed or parse from activity list?
-    // Actually, let's put the full day title here if it has more info.
+    // Create header content wrapper
+    const headerContent = document.createElement("div");
+    headerContent.className = "header-content-wrapper";
+
+    // Day title
+    const dayTitle = document.createElement("h3");
+    const dayMatch = day.match(/^(Day \d+)/i);
+    dayTitle.textContent = dayMatch ? dayMatch[1].toUpperCase() : day.toUpperCase();
+    headerContent.appendChild(dayTitle);
+
+    // Sub-header (Attractions summary) - inside the header
     if (day.includes(":")) {
       const cardSub = document.createElement("div");
       cardSub.className = "card-sub-header";
       cardSub.textContent = day.split(":")[1].trim();
-      card.appendChild(cardSub);
+      headerContent.appendChild(cardSub);
     }
+
+    cardHeader.appendChild(headerContent);
+    card.appendChild(cardHeader);
+
 
     // Body
     const cardBody = document.createElement("div");
@@ -447,25 +482,18 @@ function displayCards(response) {
         const activityElement = document.createElement("div");
         activityElement.className = "card-activity";
 
-        // Advanced Parsing Logic
-        // Strategy: Look for "Time: Title - Desc" or "Time: Desc"
-        // Heuristic: Split by first colon to get Time/Header.
-        // Advanced Parsing Logic
+        // Determine time of day for styling
+        const activityLower = activity.toLowerCase();
+        if (activityLower.includes("morning")) {
+          activityElement.classList.add("morning");
+        } else if (activityLower.includes("afternoon")) {
+          activityElement.classList.add("afternoon");
+        } else if (activityLower.includes("evening") || activityLower.includes("night")) {
+          activityElement.classList.add("evening");
+        }
+
+        // Parse activity text
         // Regex to capture "Title (Time): Description" or "Title: Description"
-        // We look for a colon that serves as a separator.
-        // Case 1: "Morning (9:00 AM): Start..." -> Header: "Morning (9:00 AM)", Body: "Start..."
-        // Case 2: "Morning: Start..." -> Header: "Morning", Body: "Start..."
-        // We generally want to split on the FIRST colon that is NOT inside parentheses, or just use a robust regex.
-
-        // This regex looks for:
-        // ^(.*?)       -> Group 1: The Header (non-greedy start)
-        // (?:          -> Non-capturing group for the separator
-        //   \):\s*     -> "):" followed by optional space (common in "Time):")
-        //   |          -> OR
-        //   :\s+       -> ":" followed by at least one space (to avoid splitting "9:00")
-        // )
-        // (.*)$        -> Group 2: The Description (rest of line)
-
         const match = activity.match(/^(.*?)(?:\):\s*|:\s+)(.*)$/);
 
         let headerText = "";
@@ -474,41 +502,26 @@ function displayCards(response) {
         if (match) {
           headerText = match[1].trim();
           descText = match[2].trim();
-        } else {
-          // Fallback: Check if it's just a short header line?
-          // If no colon separator found, treat whole line as description (or title if short?)
-          // For now, keep as description.
         }
 
-        // DOM Creation
+        // Create header element if we have one
         if (headerText) {
-          // We put the whole "Morning (9:00 AM)" into a single bold title block
-          // per the user's latest image where it's all one bold line.
-          const titleEl = document.createElement("span");
-          titleEl.className = "activity-title";
-          titleEl.textContent = headerText + ":"; // Add colon back for style if desired, or not. Image doesn't show colon clearly but implies separation
-          // Actually image shows "Morning (9:00 AM)" as bold title.
-          // Let's NOT add the colon back if we want clean look, but the text might need it contextually.
-          // The user image shows "Morning (9:00 AM)" then description below.
-          // Let's keep it clean.
+          const titleEl = document.createElement("div");
+          titleEl.className = "activity-time";
+          titleEl.textContent = headerText;
           activityElement.appendChild(titleEl);
         }
 
-        const descEl = document.createElement("span");
+        // Create description element
+        const descEl = document.createElement("div");
         descEl.className = "activity-desc";
         descEl.textContent = descText;
         activityElement.appendChild(descEl);
 
-        // Divider
-        if (index < activities.length - 1) {
-          const divider = document.createElement("hr");
-          divider.className = "activity-divider";
-          activityElement.appendChild(divider);
-        }
-
         cardBody.appendChild(activityElement);
       }
     });
+
 
     card.appendChild(cardBody);
     cardsContainer.appendChild(card);
